@@ -1,4 +1,4 @@
-c     gfortran -O2  map_coverage_p_low.f /usr/local/lib/spicelib.a -o ~/bin/map_coverage_p_low
+c     gfortran -O2  map_coverage_p_low.f /usr/local/lib/spicelib.a /usr/local/lib/COMMON.a -o ~/bin/map_coverage_p_low
 c		17 June 2021 - Eric E. Palmer
 c     Adjusted to add 1 (vs 15) for each image detected
 
@@ -57,14 +57,17 @@ c     Adjusted to add 1 (vs 15) for each image detected
       CHARACTER*72          OUTFILE
       CHARACTER*80          LINE
       character*(2051)      tline
+      real version
 
       LOGICAL               USE
       LOGICAL               HUSE(-BTMP:BTMP,-BTMP:BTMP)
       LOGICAL               ZUSE(-BTMP:BTMP,-BTMP:BTMP)
       logical               tuse(-btmp:btmp,-btmp:btmp)
 
+      version = 1.0
 
 C Start with the bigmap, get its positional data
+      write (*,*) "Version: ", version
       WRITE(6,*) 'Input RESLIM (km/px)'
       READ(5,*) RESLIM
       WRITE(6,*) 'Input MAPNAME'
@@ -205,7 +208,8 @@ C         If image was used, report some statistics to stdout
 C Make a binary 2D array before it is converted to a pgm
       open(unit=55,file='coverage.gray', access='direct', 
      .     recl=2*qsz+1, status='unknown')
-      open(unit=56,file='MMMMMM_p.gray.txt')
+      outfile=BIGMAP//'-cov.txt'
+      open(unit=56,file=outfile)
         do j=-qsz,qsz
           do i=-qsz,qsz
 C           Take the number of images and multipy it by 1 (or 15 originally)
@@ -226,10 +230,10 @@ C Convert to PGM
 C Gray is unsigned 8-bit char (0-255)
       j=2*qsz+1
       infile='coverage.gray'
-      outfile='coverage_pm.pgm'
+      outfile=BIGMAP//'-cov.pgm'
       call raw2pgm(infile,outfile,j,j)
-C      open (unit=10, file='coverage.gray', status='unknown')
-C      close(unit=10, status='delete')
+      open (unit=10, file='coverage.gray', status='unknown')
+      close(unit=10, status='delete')
 
       STOP
       END
