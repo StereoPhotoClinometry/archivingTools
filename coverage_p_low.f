@@ -64,6 +64,7 @@ C		Initalize variables
         CALL LATREC(1.d0,Z2*RPD(),Z1*RPD(), W)
         CALL U2VN(W,V(1,I,J),UZ(1,I,J))
       enddo
+      write (*,"(A1)", advance="no") "."
       enddo
 
 C		Use all unless coverage_p.in
@@ -81,6 +82,7 @@ C		Cycle over all images (SUMFILES)
         if(xname(1:1).eq.'!') go to 10
         if(xname(1:1).eq.'#') go to 10
         IF(xname(1:3).ne.'END') then
+          write (*,"(A1)", advance="no") "."
           PICNM=XNAME(2:13)
           I=SLEN(PICNM)
           PICTFILE='./SUMFILES/'//PICNM(1:I)//'.SUM'
@@ -157,7 +159,7 @@ C     Output the file in temp grayscale and ascii
         do j=1,181
           do i=1,361
             cline(i:i)=char(coverage(i,j))
-            write (11, 99) i-91, j, coverage(i,j)
+            write (11, 99) j, i-91, coverage(i,j)
           enddo
           write(10,rec=j) cline 
         enddo
