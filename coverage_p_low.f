@@ -1,4 +1,9 @@
-c     ftn  coverage_p.f /Users/rgaskell/toolkit/lib/spicelib.a -o coverage_p.e 
+c     gfortran -O2  coverage_p_low.f /usr/local/lib/spicelib.a /usr/local/lib/COMMON.a -o ~/bin/coverage_p_low
+c	May/Jun 2021 - Eric E. Palmer
+C		Adjusted to only add 1 (vs 15) for each image
+C	Version 2.0  Jun 18 2021
+C		Changed output name
+
 
       IMPLICIT NONE
       
@@ -38,10 +43,15 @@ c     ftn  coverage_p.f /Users/rgaskell/toolkit/lib/spicelib.a -o coverage_p.e
       character*361         cline
 
       LOGICAL               USE
+      real version
 
-      WRITE(6,*) 'Input RESLIM (km/px)'
+C     Set limiting resolution
+      version = 2.0
+      write (*,*) "Version: ", version
+      WRITE(6,*) 'Input RESLIM (km/px) Accept everything lower"'
       READ(5,*) RESLIM
 
+C		Initalize variables
       do i=1,361
       do j=1,181
         coverage(i,j)=0
@@ -54,19 +64,25 @@ c     ftn  coverage_p.f /Users/rgaskell/toolkit/lib/spicelib.a -o coverage_p.e
         CALL LATREC(1.d0,Z2*RPD(),Z1*RPD(), W)
         CALL U2VN(W,V(1,I,J),UZ(1,I,J))
       enddo
+      write (*,"(A1)", advance="no") "."
       enddo
 
+C		Use all unless coverage_p.in
       WRITE(6,*) 'Use all images? (y/n)'
       READ(5,FMT='(A1)') ANS
       INFILE='coverage_p.in'
       INQUIRE(FILE=INFILE, EXIST=USE)
       IF((.NOT.USE).OR.(ANS.EQ.'y')) INFILE='PICTLIST.TXT'
       open(unit=20, file=INFILE, status='old')
+
+
+C		Cycle over all images (SUMFILES)
 10      continue
         read(20,fmt='(a13)') xname
         if(xname(1:1).eq.'!') go to 10
         if(xname(1:1).eq.'#') go to 10
         IF(xname(1:3).ne.'END') then
+          write (*,"(A1)", advance="no") "."
           PICNM=XNAME(2:13)
           I=SLEN(PICNM)
           PICTFILE='./SUMFILES/'//PICNM(1:I)//'.SUM'
@@ -99,6 +115,8 @@ c     ftn  coverage_p.f /Users/rgaskell/toolkit/lib/spicelib.a -o coverage_p.e
           Z6=0
           Z7=0
           K=0
+
+C         Cycle over every pixel
           do i=1,361
           do j=2,180
             CALL VADD(V0,V(1,i,j),W)
@@ -111,6 +129,8 @@ c     ftn  coverage_p.f /Users/rgaskell/toolkit/lib/spicelib.a -o coverage_p.e
      .                     CX,CY,CZ, USE,IMGPL)
               Z5=Z4*Z5/(-VDOT(W,UZ(1,i,j)))
               USE=USE.AND.(Z5.LE.RESLIM)
+
+C             Add 1 rather than 15)
               IF(USE) THEN
                 coverage(i,j)=min(255,coverage(i,j)+1)
                 Z6=Z6-VDOT(W,UZ(1,i,j))
@@ -131,18 +151,27 @@ c     ftn  coverage_p.f /Users/rgaskell/toolkit/lib/spicelib.a -o coverage_p.e
         ENDIF
       close(unit=20)
 
+C     Output the file in temp grayscale and ascii
       open (unit=10, file='coverage.gray', access='direct', 
      .      recl=361, status='unknown')
+      outfile='coverage_p.ll'
+      open (unit=11, file=outfile)
         do j=1,181
           do i=1,361
             cline(i:i)=char(coverage(i,j))
+            write (11, 99) j, i-91, coverage(i,j)
           enddo
           write(10,rec=j) cline 
         enddo
       close(unit=10)
+      close(unit=11)
+ 99   format (3i5)
+
       write(6,*) 
       write(6,*) 'coverage done'
 
+
+C     Generate the PGM
       npx=361
       nln=181
       infile='coverage.gray'
