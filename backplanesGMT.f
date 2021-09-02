@@ -78,7 +78,7 @@ C.          Scaled the verticle height values by 1000 (from km to m)
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.5
+      version = 1.6
       WRITE(*,*) 'Version:', version
 
       minLat = 90

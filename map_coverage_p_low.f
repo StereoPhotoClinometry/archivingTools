@@ -38,6 +38,7 @@ c     Adjusted to add 1 (vs 15) for each image detected
       REAL*4                ZAL(-BTMP:BTMP,-BTMP:BTMP)
       REAL*4                NH(-BTMP:BTMP,-BTMP:BTMP)
       real*4                tmpl(-btmp:btmp,-btmp:btmp,3)
+      real*4                bestRes (-BTMP:BTMP, -BTMP:BTMP)
 
       INTEGER               NPX, NLN
       INTEGER               I
@@ -64,7 +65,7 @@ c     Adjusted to add 1 (vs 15) for each image detected
       LOGICAL               ZUSE(-BTMP:BTMP,-BTMP:BTMP)
       logical               tuse(-btmp:btmp,-btmp:btmp)
 
-      version = 1.0
+      version = 1.1
 
 C Start with the bigmap, get its positional data
       write (*,*) "Version: ", version
@@ -87,6 +88,10 @@ C       If Albedo value is very low, skip that pixel on the maplet
 
 C       Set pixel counter to 0
         NH(I,J)=0
+
+
+C       Set best resolution value to high value to avoid 
+        bestRes (i,J) = 99999
       ENDDO
       ENDDO
       call hgt2slp(btmp,qsz,HUSE,HT, tuse,tmpl)
@@ -176,6 +181,11 @@ C             Check for image resolution
               Z5=Z4*Z5/(-VDOT(W,N(1,i,j)))
               USE=USE.AND.(Z5.LE.RESLIM)
 
+C             Z5 is the current pixel resolution.  Save it if it's better
+              if (RESLIM .LT. bestRes(i,j) ) then
+                bestRes(i,j) = Z5
+              endif
+
 C             Incremement counter
               IF(USE) THEN 
                 NH(I,J)=NH(I,J)+1 
@@ -210,6 +220,8 @@ C Make a binary 2D array before it is converted to a pgm
      .     recl=2*qsz+1, status='unknown')
       outfile=BIGMAP//'-cov.txt'
       open(unit=56,file=outfile)
+      outfile=BIGMAP//'-res.txt'
+      open(unit=57,file=outfile)
         do j=-qsz,qsz
           do i=-qsz,qsz
 C           Take the number of images and multipy it by 1 (or 15 originally)
@@ -217,14 +229,18 @@ C           Take the number of images and multipy it by 1 (or 15 originally)
 c            z1=15*nh(i,j)
             z1=min(255.,z1)
             tline(i+qsz+1:i+qsz+1)=char(nint(z1))
-            write (56, 99, advance="no") nh(i,j)
+            write (56, 98, advance="no") nh(i,j)
+            write (57, 99, advance="no") bestRes(i,j)
           enddo
           write(55,rec=j+qsz+1) tline(1:2*qsz+1)
           write (56, 99) 
+          write (57, 99) 
         enddo
       close(unit=55)
       close(unit=56)
- 99   format (f9.0)
+      close(unit=57)
+ 98   format (f9.0)
+ 99   format (f12.8)
 
 C Convert to PGM
 C Gray is unsigned 8-bit char (0-255)
