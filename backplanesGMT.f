@@ -11,6 +11,8 @@ c		Output is in list format
 c		Output file with Lon, Lat Plus channels for H, albedo, slope_pix, slope_norm
 C	Version 1.5 - 15 June 2021
 c		Added min/max lat/lon
+C.    Version 1.6 - 2 Sep 2021
+C.          Scaled the verticle height values by 1000 (from km to m)
 
       IMPLICIT NONE
 
@@ -112,6 +114,8 @@ C     Do the basics for the center pixel
 C     Open the files that we will create
       LMRKFILE=MAP0//'-r.txt'
       OPEN(UNIT=10,FILE=LMRKFILE)
+      write (*,*) LMRKFILE, " has been scaled x1000, km to m"
+      write (*,*) "Be sure your input BIGMAP is in km"
 
       LMRKFILE=MAP0//'-alb.txt'
       OPEN(UNIT=11,FILE=LMRKFILE)
@@ -160,7 +164,7 @@ C			Lat and lon
               lon = lon + 360
           endif
           lat = asin ( localV(3)/dist) * 180/3.1415926
-          write(10,240) dist
+          write(10,240) dist*1000
           write(15,241) lon, lat
 
           if ( maxLat .LT. lat ) maxLat = lat
