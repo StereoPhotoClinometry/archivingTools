@@ -6,6 +6,8 @@ c		Calculates lat/lon and outputs them also
 c	Version 1.2 - 8 June 2021 - Eric E. Palmer
 c		Updated to remove rotation that exists sometimes (not sure why)
 c		Lon output is in East Longitude
+C  Version 1.3 - 23 Sep 2021 - Eric E. Palmer
+C           Added a check for NaN for COS for phase chanel
 
       IMPLICIT NONE
 
@@ -58,6 +60,8 @@ c		Lon output is in East Longitude
       DOUBLE PRECISION      KMAT(2,3)
       DOUBLE PRECISION      D(4)
       DOUBLE PRECISION      CTR(2)
+      DOUBLE PRECISION      PHASE
+      
 
       DOUBLE PRECISION      CP(3)
       DOUBLE PRECISION      SP(3)
@@ -224,6 +228,11 @@ C         Emission
           write(11,240, advance="no") ang
 
 C         Phase
+          phase = VDOT(CP,SP)
+          if phase .GT. 1) then
+             write (*,*) I,J, phase, CP, SP
+             phase = 1
+          endif
           ALPHA=ACOS(VDOT(CP,SP))/RPD()
           write(12,240, advance="no") ALPHA
 
