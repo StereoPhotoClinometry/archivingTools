@@ -1,11 +1,13 @@
 c  Version 1.0 - 26 Sep 2019- Eric Palmer 
 c	This outputs a set of binary files of i, e, and phase
-c  gfortran phasei.f /usr/local/lib/spicelib.a COMMON.a -O2 -o ~/bin/t.phasei
 c  gfortran phasei.f /usr/local/lib/spicelib.a /Users/JW/Dropbox/SPC-ORex/v3.0.4/COMMON.a -O2 -o ~/bin/t.phasei
 c  Version 1.1 - 25 Nov 2020 - Eric E. Palmer
 c		Calculates lat/lon and outputs them also
 c  Version 1.2 -- 14 May 2021
 C     Checks for bad data.  If Z2 is greater than 1, set to 1 and show error
+C  Version 1.3 - 23 Sep 2021 - Eric E. Palmer
+C           Added a check for NaN for COS for incidence, emission and phase chanel
+
 
       IMPLICIT NONE
 
@@ -20,7 +22,7 @@ C     Checks for bad data.  If Z2 is greater than 1, set to 1 and show error
       DOUBLE PRECISION      VNORM
 
       REAL*8                GAMMA, ETA, Z1, Z2, ILLUM, ALPHA, RPD
-      REAL                  slope(3)
+      REAL*8                slope(3)
 
       REAL*4                TMPL(-NTMP:NTMP,-NTMP:NTMP,3)
       LOGICAL               HUSE(-NTMP:NTMP,-NTMP:NTMP)
@@ -73,7 +75,7 @@ C     Checks for bad data.  If Z2 is greater than 1, set to 1 and show error
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.2
+      version = 1.3
 
 
       WRITE(*,*) 'Version:', version
@@ -218,6 +220,10 @@ C         Calculate the angles
 C             Run the fastes array element for the 1st index
 C         Incidence
           Z1=(SP(3) + TMPL(I,J,1)*SP(1) + TMPL(I,J,2)*SP(2) )/GAMMA
+          if (Z1 .GT. 1) then
+             write (*,*) I,J, Z1, CP, SP, gamma
+             Z1 = 1
+          endif
           ang = ACOS (Z1) / RPD()
           write(10,240, advance="no") ang
 
@@ -231,7 +237,12 @@ C         Emission
           write(11,240, advance="no") ang
 
 C         Phase
-          ALPHA=ACOS(VDOT(CP,SP))/RPD()
+          hold = VDOT(CP,SP)
+          if (hold .GT. 1) then
+             write (*,*) I,J, hold, CP, SP
+             hold = 1
+          endif
+          ALPHA=ACOS(hold)/RPD()
           write(12,240, advance="no") ALPHA
 
 C         Slope
