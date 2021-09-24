@@ -67,6 +67,7 @@ C           Added a check for NaN for COS for incidence, emission and phase chan
       REAL                  Z0
       REAL                  ang
       REAL                  dist, lat, lon
+      DOUBLE PRECISION      hold
 
 
 
