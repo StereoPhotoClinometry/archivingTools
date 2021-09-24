@@ -75,7 +75,7 @@ C           Added a check for NaN for COS for incidence, emission and phase chan
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.3
+      version = 1.4
 
 
       WRITE(*,*) 'Version:', version
@@ -221,7 +221,7 @@ C             Run the fastes array element for the 1st index
 C         Incidence
           Z1=(SP(3) + TMPL(I,J,1)*SP(1) + TMPL(I,J,2)*SP(2) )/GAMMA
           if (Z1 .GT. 1) then
-             write (*,*) I,J, Z1, CP, SP, gamma
+             write (*,*) "Z1 is greater than 1",I,J, Z1, CP, SP, gamma
              Z1 = 1
           endif
           ang = ACOS (Z1) / RPD()
