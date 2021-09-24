@@ -7,7 +7,7 @@ c	Version 1.2 - 8 June 2021 - Eric E. Palmer
 c		Updated to remove rotation that exists sometimes (not sure why)
 c		Lon output is in East Longitude
 C  Version 1.3 - 23 Sep 2021 - Eric E. Palmer
-C           Added a check for NaN for COS for phase chanel
+C           Added a check for NaN for COS for incidence, emission and phase chanel
 
       IMPLICIT NONE
 
@@ -22,7 +22,7 @@ C           Added a check for NaN for COS for phase chanel
       DOUBLE PRECISION      VNORM
 
       REAL*8                GAMMA, ETA, Z1, Z2, ILLUM, ALPHA, RPD
-      REAL                  slope(3)
+      REAL*8                slope(3)
 
       REAL*4                TMPL(-NTMP:NTMP,-NTMP:NTMP,3)
       LOGICAL               HUSE(-NTMP:NTMP,-NTMP:NTMP)
@@ -60,7 +60,7 @@ C           Added a check for NaN for COS for phase chanel
       DOUBLE PRECISION      KMAT(2,3)
       DOUBLE PRECISION      D(4)
       DOUBLE PRECISION      CTR(2)
-      DOUBLE PRECISION      PHASE
+      DOUBLE PRECISION      hold
       
 
       DOUBLE PRECISION      CP(3)
@@ -219,21 +219,29 @@ C         Calculate the angles
 C             Run the fastes array element for the 1st index
 C         Incidence
           Z1=(SP(3) + TMPL(I,J,1)*SP(1) + TMPL(I,J,2)*SP(2) )/GAMMA
+          if (Z1 .GT. 1) then
+             write (*,*) I,J, Z1, CP, SP, gamma
+             Z1 = 1
+          endif
           ang = ACOS (Z1) / RPD()
           write(10,240, advance="no") ang
 
 C         Emission
           Z2=(CP(3) + TMPL(I,J,1)*CP(1) + TMPL(I,J,2)*CP(2) )/GAMMA
+          if (Z2 .GT. 1) then
+             write (*,*) I,J, Z2, CP, SP, gamma
+             Z2 = 1
+          endif
           ang = ACOS (Z2) / RPD()
           write(11,240, advance="no") ang
 
 C         Phase
-          phase = VDOT(CP,SP)
-          if phase .GT. 1) then
-             write (*,*) I,J, phase, CP, SP
-             phase = 1
+          hold = VDOT(CP,SP)
+          if (hold .GT. 1) then
+             write (*,*) I,J, hold, CP, SP
+             hold = 1
           endif
-          ALPHA=ACOS(VDOT(CP,SP))/RPD()
+          ALPHA=ACOS(hold)/RPD()
           write(12,240, advance="no") ALPHA
 
 C         Slope
