@@ -6,8 +6,8 @@ c		Calculates lat/lon and outputs them also
 c	Version 1.2 - 8 June 2021 - Eric E. Palmer
 c		Updated to remove rotation that exists sometimes (not sure why)
 c		Lon output is in East Longitude
-C  Version 1.3 - 23 Sep 2021 - Eric E. Palmer
-C           Added a check for NaN for COS for incidence, emission and phase chanel
+c  Version 1.2 -- 14 May 2021
+C     Checks for bad data.  If Z2 is greater than 1, set to 1 and show error
 
       IMPLICIT NONE
 
@@ -22,7 +22,6 @@ C           Added a check for NaN for COS for incidence, emission and phase chan
       DOUBLE PRECISION      VNORM
 
       REAL*8                GAMMA, ETA, Z1, Z2, ILLUM, ALPHA, RPD
-      REAL*8                slope(3)
 
       REAL*4                TMPL(-NTMP:NTMP,-NTMP:NTMP,3)
       LOGICAL               HUSE(-NTMP:NTMP,-NTMP:NTMP)
@@ -60,8 +59,6 @@ C           Added a check for NaN for COS for incidence, emission and phase chan
       DOUBLE PRECISION      KMAT(2,3)
       DOUBLE PRECISION      D(4)
       DOUBLE PRECISION      CTR(2)
-      DOUBLE PRECISION      hold
-      
 
       DOUBLE PRECISION      CP(3)
       DOUBLE PRECISION      SP(3)
@@ -77,7 +74,6 @@ C           Added a check for NaN for COS for incidence, emission and phase chan
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.3
 
 
       WRITE(*,*) 'Version:', version
@@ -190,8 +186,8 @@ C       To match readmap, the fastest change in the 1st index of the array
 c			Code updated (8 June 2021) - flipping axis
 C      DO J=-QSZ,QSZ                                                     col, X
 C      DO I=-QSZ,QSZ                                                     row, Y
-      DO i=-QSZ,QSZ                                                     col, X
-      DO j=-QSZ,QSZ                                                     row, Y
+      DO J=-QSZ,QSZ                                                     col, X
+      DO I=-QSZ,QSZ                                                     row, Y
 
 c          tmpl (I,J,1) = 0
 c          tmpl (I,J,2) = 0
@@ -213,6 +209,12 @@ C         Converts into spacecraft frame
           SP(2)= VDOT(SZ,UY)
           SP(3)= VDOT(SZ,UZ)
           GAMMA=SQRT(1+TMPL(I,J,1)**2+TMPL(I,J,2)**2)
+
+C         Look for bad data
+          if (GAMMA .EQ. 0) then
+             write (*,*) "Gamma null", i, j, TMPL(I,J,1), TMPL(I,J,2)
+             exit
+          ENDIF
   
 
 C         Calculate the angles
@@ -232,6 +234,10 @@ C         Emission
              write (*,*) I,J, Z2, CP, SP, gamma
              Z2 = 1
           endif
+          if (Z2 .gt. 1) then
+             write (*,*) "Z2 is greater than 1", Z2, ANG, "I, J", I, J
+             Z2 = 1 
+          ENDIF
           ang = ACOS (Z2) / RPD()
           write(11,240, advance="no") ang
 
