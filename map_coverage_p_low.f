@@ -192,7 +192,7 @@ C             Check for image resolution
               USE=USE.AND.(Z5.LE.RESLIM)
 
 C             Z5 is the current pixel resolution.  Save it if it's better
-              if (RESLIM .LT. bestRes(i,j) ) then
+              if (Z5 .LT. bestRes(i,j) ) then
                 bestRes(i,j) = Z5
               endif
 
