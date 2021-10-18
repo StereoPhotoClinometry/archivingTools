@@ -102,16 +102,20 @@ C       Set pixel counter to 0
 
 
 C       Set best resolution value to high value to avoid 
-        bestRes (i,J) = 99999
+        bestRes (i,J) = 9999
       ENDDO
       ENDDO
       call hgt2slp(btmp,qsz,HUSE,HT, tuse,tmpl)
       DO J=-QSZ,QSZ
       DO I=-QSZ,QSZ
+
+C       VK is the vector to the 3D position of each surface element
       IF(HUSE(I,J)) THEN
         VK(1,I,J)=V(1)+S0*(J*UX(1)+I*UY(1)+HT(I,J)*UZ(1))
         VK(2,I,J)=V(2)+S0*(J*UX(2)+I*UY(2)+HT(I,J)*UZ(2))
         VK(3,I,J)=V(3)+S0*(J*UX(3)+I*UY(3)+HT(I,J)*UZ(3))
+
+C       N is a vector for the normal reflecting the local slope
         if(tuse(i,j)) then
           z1=sqrt(1+tmpl(i,j,1)**2+tmpl(i,j,2)**2)
           n(1,i,j)=(uz(1)+ux(1)*tmpl(i,j,1)+uy(1)*tmpl(i,j,2))/z1
@@ -167,8 +171,11 @@ C Loop through all SUMFILES to get geometry
               D(4)=0.D0
             ENDIF
           CLOSE(UNIT=10)
+C         Z1 and Z2 - are likely the physical size of the detector
           Z1=NPX/(2*KMAT(1,1)*MMFL)
           Z2=NLN/(2*KMAT(2,2)*MMFL)
+
+C         Z3 is the cos of the diagonal
           Z3=COS(SQRT(Z1**2+Z2**2))
           Z4=1.D0/(MMFL*SQRT(ABS(KMAT(1,1)*KMAT(2,2))))
           Z6=0
@@ -179,25 +186,35 @@ C         Loop over maplet's boundary
           DO J=-QSZ,QSZ
           DO I=-QSZ,QSZ
           IF(HUSE(I,J).AND.TUSE(I,J)) THEN
+C           V0 is SCOBJ, W *should* be the vector from the s/c to surface
             CALL VADD(V0,VK(1,I,J),W)
+
+C           Z5 is the scaler, distance from the S/C
             Z5=VNORM(W)
             CALL VHAT(W,W)
+
             IF(VDOT(W,CZ).GT.Z3) THEN
+
+C           Testing to see if illuminated 
             IF(-VDOT(W,N(1,I,J)).GT.0) THEN
             IF(VDOT(SZ,N(1,i,j)).GT.0) THEN
+
+C           Use V2IMGPL to see if the pixel is valid for the image
               CALL V2IMGPL(VK(1,I,J),V0,PICNM,NPX,NLN,MMFL,CTR,
      .                     KMAT,D,CX,CY,CZ, USE,IMGPL)
 
 C             Check for image resolution
-              Z5=Z4*Z5/(-VDOT(W,N(1,i,j)))
+              Z5=Z4*Z5
+C              Z5=Z4*Z5/(-VDOT(W,N(1,i,j)))
               USE=USE.AND.(Z5.LE.RESLIM)
 
 C             Z5 is the current pixel resolution.  Save it if it's better
               if (Z5 .LT. bestRes(i,j) ) then
-                bestRes(i,j) = Z5
+c                bestRes(i,j) = Z5
               endif
 
 C             Incremement counter
+C             Sum the emission and image resolution for average
               IF(USE) THEN 
                 NH(I,J)=NH(I,J)+1 
                 Z6=Z6-VDOT(W,N(1,i,j))
@@ -213,6 +230,7 @@ C             Incremement counter
 
 C         If image was used, report some statistics to stdout
           IF(K.NE.0) THEN
+C           Average the emission angle and image resolution that was used
             Z6=Z6/K
             Z7=Z7/K
             I=LMCOUNT(PICNM,0)
@@ -251,7 +269,7 @@ c            z1=15*nh(i,j)
       close(unit=56)
       close(unit=57)
  98   format (f9.0)
- 99   format (f12.8)
+ 99   format (f16.8)
 
 C Convert to PGM
 C Gray is unsigned 8-bit char (0-255)
