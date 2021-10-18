@@ -1,13 +1,13 @@
 c  Version 1.0 - 26 Sep 2019- Eric Palmer 
 c	This outputs a set of binary files of i, e, and phase
-c  gfortran phasei.f /usr/local/lib/spicelib.a COMMON.a -O2 -o ~/bin/t.phasei
+c  gfortran phasei.f /usr/local/lib/spicelib.a /Users/JW/Dropbox/SPC-ORex/v3.0.4/COMMON.a -O2 -o ~/bin/t.phasei
 c  Version 1.1 - 25 Nov 2020 - Eric E. Palmer
 c		Calculates lat/lon and outputs them also
-c	Version 1.2 - 8 June 2021 - Eric E. Palmer
-c		Updated to remove rotation that exists sometimes (not sure why)
-c		Lon output is in East Longitude
+c  Version 1.2 -- 14 May 2021
+C     Checks for bad data.  If Z2 is greater than 1, set to 1 and show error
 C  Version 1.3 - 23 Sep 2021 - Eric E. Palmer
 C           Added a check for NaN for COS for incidence, emission and phase chanel
+
 
       IMPLICIT NONE
 
@@ -60,8 +60,6 @@ C           Added a check for NaN for COS for incidence, emission and phase chan
       DOUBLE PRECISION      KMAT(2,3)
       DOUBLE PRECISION      D(4)
       DOUBLE PRECISION      CTR(2)
-      DOUBLE PRECISION      hold
-      
 
       DOUBLE PRECISION      CP(3)
       DOUBLE PRECISION      SP(3)
@@ -69,6 +67,7 @@ C           Added a check for NaN for COS for incidence, emission and phase chan
       REAL                  Z0
       REAL                  ang
       REAL                  dist, lat, lon
+      DOUBLE PRECISION      hold
 
 
 
@@ -77,7 +76,7 @@ C           Added a check for NaN for COS for incidence, emission and phase chan
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.3
+      version = 1.4
 
 
       WRITE(*,*) 'Version:', version
@@ -187,11 +186,8 @@ C     Open the files that we will create
 
 C     Loop over the entire array
 C       To match readmap, the fastest change in the 1st index of the array
-c			Code updated (8 June 2021) - flipping axis
-C      DO J=-QSZ,QSZ                                                     col, X
-C      DO I=-QSZ,QSZ                                                     row, Y
-      DO i=-QSZ,QSZ                                                     col, X
-      DO j=-QSZ,QSZ                                                     row, Y
+      DO J=-QSZ,QSZ                                                     col, X
+      DO I=-QSZ,QSZ                                                     row, Y
 
 c          tmpl (I,J,1) = 0
 c          tmpl (I,J,2) = 0
@@ -213,6 +209,12 @@ C         Converts into spacecraft frame
           SP(2)= VDOT(SZ,UY)
           SP(3)= VDOT(SZ,UZ)
           GAMMA=SQRT(1+TMPL(I,J,1)**2+TMPL(I,J,2)**2)
+
+C         Look for bad data
+          if (GAMMA .EQ. 0) then
+             write (*,*) "Gamma null", i, j, TMPL(I,J,1), TMPL(I,J,2)
+             exit
+          ENDIF
   
 
 C         Calculate the angles
@@ -220,7 +222,7 @@ C             Run the fastes array element for the 1st index
 C         Incidence
           Z1=(SP(3) + TMPL(I,J,1)*SP(1) + TMPL(I,J,2)*SP(2) )/GAMMA
           if (Z1 .GT. 1) then
-             write (*,*) I,J, Z1, CP, SP, gamma
+             write (*,*) "Z1 is greater than 1",I,J, Z1, CP, SP, gamma
              Z1 = 1
           endif
           ang = ACOS (Z1) / RPD()
@@ -228,10 +230,10 @@ C         Incidence
 
 C         Emission
           Z2=(CP(3) + TMPL(I,J,1)*CP(1) + TMPL(I,J,2)*CP(2) )/GAMMA
-          if (Z2 .GT. 1) then
-             write (*,*) I,J, Z2, CP, SP, gamma
-             Z2 = 1
-          endif
+          if (Z2 .gt. 1) then
+             write (*,*) "Z2 is greater than 1", Z2, ANG, "I, J", I, J
+             Z2 = 1 
+          ENDIF
           ang = ACOS (Z2) / RPD()
           write(11,240, advance="no") ang
 
