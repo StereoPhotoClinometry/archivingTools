@@ -1,6 +1,16 @@
 c     gfortran -O2  map_coverage_p_low.f /usr/local/lib/spicelib.a /usr/local/lib/COMMON.a -o ~/bin/map_coverage_p_low
 c		17 June 2021 - Eric E. Palmer
 c     Adjusted to add 1 (vs 15) for each image detected
+C     Also includes outputting the best resolution per pixel
+C     Input 
+C         The worst resolution image that will be used
+C         A maplet name
+C         If you don't want to use PICTLIST.TXT you can select a different one
+C					as coverage_p.in
+C     Output
+C         pgm of the coverage with each DN as an image
+C         txt of the coverage, actual vlaues
+C         txt of the best resolution detected
 
       IMPLICIT NONE
       
