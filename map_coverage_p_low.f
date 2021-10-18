@@ -11,6 +11,7 @@ C     Output
 C         pgm of the coverage with each DN as an image
 C         txt of the coverage, actual vlaues
 C         txt of the best resolution detected
+C     Version 1.2 - Fixed resolution check (z5 rather than RESLIM)
 
       IMPLICIT NONE
       
@@ -75,7 +76,7 @@ C         txt of the best resolution detected
       LOGICAL               ZUSE(-BTMP:BTMP,-BTMP:BTMP)
       logical               tuse(-btmp:btmp,-btmp:btmp)
 
-      version = 1.1
+      version = 1.2
 
 C Start with the bigmap, get its positional data
       write (*,*) "Version: ", version
