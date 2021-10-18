@@ -8,6 +8,8 @@ c		Updated to remove rotation that exists sometimes (not sure why)
 c		Lon output is in East Longitude
 C  Version 1.3 - 23 Sep 2021 - Eric E. Palmer
 C           Added a check for NaN for COS for incidence, emission and phase chanel
+C  Version 1.4 - 18 Oct 2021 - Eric E. Palmer
+C		Add X/Y/Z Cartisian coordinats to the output
 
       IMPLICIT NONE
 
@@ -183,6 +185,12 @@ C     Open the files that we will create
       OPEN(UNIT=15,FILE=LMRKFILE)
       LMRKFILE=MAP0//'-lon.TXT'
       OPEN(UNIT=16,FILE=LMRKFILE)
+      LMRKFILE=MAP0//'-x.TXT'
+      OPEN(UNIT=17,FILE=LMRKFILE)
+      LMRKFILE=MAP0//'-y.TXT'
+      OPEN(UNIT=18,FILE=LMRKFILE)
+      LMRKFILE=MAP0//'-z.TXT'
+      OPEN(UNIT=19,FILE=LMRKFILE)
 
 
 C     Loop over the entire array
@@ -255,6 +263,11 @@ C			Lat and lon
           write(15,240, advance="no") lat 
           write(16,240, advance="no") lon 
 
+C         Write out X/Y/Z Cartesian coordintes
+          write(17,240, advance="no") localV(1) 
+          write(18,240, advance="no") localV(2) 
+          write(19,240, advance="no") localV(3) 
+
         ENDDO
 
         write (10, *)
@@ -264,10 +277,23 @@ C			Lat and lon
         write (14, *)
         write (15, *)
         write (16, *)
+        write (17, *)
+        write (18, *)
+        write (19, *)
       ENDDO
 
  240  format (f14.5)
 
+      close (10)
+      close (11)
+      close (12)
+      close (13)
+      close (14)
+      close (15)
+      close (16)
+      close (17)
+      close (18)
+      close (19)
 
       STOP
       END
