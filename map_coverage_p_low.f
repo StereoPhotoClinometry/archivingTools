@@ -42,6 +42,7 @@ C         Fixed resolution check (z5 rather than RESLIM)
       DOUBLE PRECISION      D(4)
       DOUBLE PRECISION      IMGPL(2)
       DOUBLE PRECISION      RESLIM
+      DOUBLE PRECISION      RES
       DOUBLE PRECISION      Z1, Z2, Z3, Z4, Z5, Z6, Z7
 
       REAL*4                HT(-BTMP:BTMP,-BTMP:BTMP)
@@ -56,6 +57,7 @@ C         Fixed resolution check (z5 rather than RESLIM)
       INTEGER               I
       INTEGER               J
       INTEGER               K
+      INTEGER               usedK
       INTEGER               SLEN
       INTEGER               LMCOUNT      
       INTEGER               T1, T2
@@ -138,10 +140,10 @@ C Get list of images to check -- coverage_p.in allows a subset (if you also say 
 
 
 C Loop through all SUMFILES to get geometry
-        WRITE(6,FMT='(1X,A12,2A10,3A10)')  "PICNM", "Angle", "Res?",
-     .     "# LMK", "Min Thres", "Max Thres"
-        WRITE(30,FMT='(1A,A12,2A10,3A10)')  "#", "PICNM","Angle","Res?",
-     .     "# LMK", "Min Thres", "Max Thres"
+        WRITE(6,FMT='(1X,A12,2A10,4A10)')  "PICNM", "Angle", "Res?",
+     .     "# LMK", "Min Thres", "Max Thres", "Pixel", "Used"
+        WRITE(30,FMT='(1A,A12,2A10,4A10)')  "#", "PICNM","Angle","Res?",
+     .     "# LMK", "Min Thres", "Max Thres", "Pixel", "Used"
 10      continue
         read(20,fmt='(a13)') xname
         if(xname(1:1).eq.'!') go to 10
@@ -182,6 +184,7 @@ C         Z3 is the cos of the diagonal
           Z6=0
           Z7=0
           K=0
+          usedK=0
 
 C         Loop over maplet's boundary
           DO J=-QSZ,QSZ
@@ -205,22 +208,27 @@ C           Use V2IMGPL to see if the pixel is valid for the image
      .                     KMAT,D,CX,CY,CZ, USE,IMGPL)
 
 C             Check for image resolution
-              Z5=Z4*Z5
-C              Z5=Z4*Z5/(-VDOT(W,N(1,i,j)))
+              RES = Z4 * Z5
+C             Bob's calculation of resolution (Z5)
+              Z5=Z4*Z5/(-VDOT(W,N(1,i,j)))
               USE=USE.AND.(Z5.LE.RESLIM)
 
-C             Z5 is the current pixel resolution.  Save it if it's better
-              if (Z5 .LT. bestRes(i,j) ) then
-                 bestRes(i,j) = Z5
-              endif
 
 C             Incremement counter
 C             Sum the emission and image resolution for average
+C             Store better resolution
               IF(USE) THEN 
                 NH(I,J)=NH(I,J)+1 
                 Z6=Z6-VDOT(W,N(1,i,j))
                 Z7=Z7+Z5
                 K=K+1
+
+C 	              Res is the current pixel resolution.  Save it if it's better
+                 if (RES .LT. bestRes(i,j) ) then
+                    bestRes(i,j) = RES
+                    usedK=usedK+1
+                 endif
+
               ENDIF
             ENDIF
             ENDIF
@@ -235,10 +243,10 @@ C           Average the emission angle and image resolution that was used
             Z6=Z6/K
             Z7=Z7/K
             I=LMCOUNT(PICNM,0)
-            WRITE(6,FMT='(1X,A12,2F10.3,3I10)')  PICNM, 
-     .        ACOS(Z6)/RPD(), Z7, I, T1, T2
-            WRITE(30,FMT='(1X,A12,2F10.3,3I10)') PICNM, 
-     .        ACOS(Z6)/RPD(), Z7, I, T1, T2
+            WRITE(6,FMT='(1X,A12,2F10.3,5I10)')  PICNM, 
+     .        ACOS(Z6)/RPD(), Z7, I, T1, T2, K, usedK
+            WRITE(30,FMT='(1X,A12,2F10.3,5I10)') PICNM, 
+     .        ACOS(Z6)/RPD(), Z7, I, T1, T2, K, usedK
            ENDIF
           go to 10
         ENDIF
