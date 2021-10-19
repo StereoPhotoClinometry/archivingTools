@@ -11,7 +11,8 @@ C     Output
 C         pgm of the coverage with each DN as an image
 C         txt of the coverage, actual vlaues
 C         txt of the best resolution detected
-C     Version 1.2 - Fixed resolution check (z5 rather than RESLIM)
+C     Version 1.2 - 19 Oct 2021
+C         Fixed resolution check (z5 rather than RESLIM)
 
       IMPLICIT NONE
       
@@ -210,7 +211,7 @@ C              Z5=Z4*Z5/(-VDOT(W,N(1,i,j)))
 
 C             Z5 is the current pixel resolution.  Save it if it's better
               if (Z5 .LT. bestRes(i,j) ) then
-c                bestRes(i,j) = Z5
+                 bestRes(i,j) = Z5
               endif
 
 C             Incremement counter
