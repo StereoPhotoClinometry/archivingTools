@@ -190,7 +190,7 @@ C     Adjust to be width (vs radius)
 
 C     Find the max
       maxDelta = 0
-      DO I=-Q1,Q1
+      DO I=-iDist/2,iDist/21
         myHeight=H(I)
         eqn = m * (I + iDist) + b
         delta = eqn - myHeight
@@ -217,11 +217,15 @@ C       Logic for showing crater sides, center and max
         if ( I .EQ. maxIndex ) flag = 1
 
 C       Print all three if interesting, otherwise made 3rd field blank
-        if ( flag .EQ. 1) then
-              write(20,*)myHeight, eqn, myHeight
-        else 
-              write(20,*)myHeight, eqn
-        endif
+        if ( I .EQ. maxIndex ) then
+                 write(20,*)myHeight, eqn, eqn, myHeight
+        else
+             if ( flag .EQ. 1) then
+                   write(20,*)myHeight, eqn, myHeight, " # "
+             else 
+                   write(20,*)myHeight, eqn, " # ", " # "
+             endif
+         endif
       ENDDO
       CLOSE(UNIT=20)
 
