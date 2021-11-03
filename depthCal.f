@@ -28,7 +28,10 @@
       INTEGER            JC, JL
       INTEGER            K, L
       INTEGER            QSZ
-      INTEGER            Q, Q0, Q1
+      INTEGER            Q, Q0, Q1, maxIndex
+      INTEGER            distX, distY, craterX, craterY, iDist
+      REAL*4             leftHeight, rightHeight, m, b, dist, flag
+      REAL*4             eqn, delta, maxDelta
 
       CHARACTER*6        MAPNM
       CHARACTER*72       MAPFILE
@@ -49,6 +52,22 @@
 
       WRITE(6,*) 'Input left'
       READ(5,*) IL, JL
+
+
+C     Compute the radius components and rim positions
+      distX = NINT ((IC - IL) / 2.0)
+      distY = NINT ((JC - JL) / 2.0)
+
+      craterX = IC - distX
+      craterY = JC - distY
+      leftHeight = HT(craterX - QSZ, craterY - QSZ)
+      write (*,*) "                     X          Y       Height"
+      write (*,*) "Start Rim:  ", craterX, craterY, leftHeight
+
+      craterX = IC + distX
+      craterY = JC + distY
+      rightHeight = HT(craterX - QSZ, craterY - QSZ)
+      write (*,*) "End Rim:    ", craterX, craterY, rightHeight
 
       Z1=0
       Z2=0
@@ -77,10 +96,11 @@ C       G is image, but it also is a slopemap (fake shaded relief)
       ENDDO
   
 
-      write (*,*) "Height at left ", HT(IL, JL)
-      write (*,*) "Height at center is ", HT(IC, JC)
-      write (*,*) "Height right ",HT(IC + ABS(IL-IC), JC + ABS (JL-JC))
-      write (*,*) "Min/Max is ", mi, ma
+c      write (*,*) "Height at left ", HT(IL-QSZ, JL-QSZ)
+c      write (*,*) "Height at center is ", HT(IC-QSZ, JC-QSZ)
+c      write (*,*) "Height right ",HT(IC + ABS(IL-IC)-QSZ, JC 
+c     +                           + ABS (JL-JC)-QSZ)
+c      write (*,*) "Min/Max is ", mi, ma
 
 
 C     Scale the image
@@ -124,7 +144,7 @@ C       Calculate the averaged height
         Z1=MIN(Z1,H(K))
         Z2=MAX(Z2,H(K))
       ENDDO
-      write (*,*) "Other min/max", Z1, Z2
+c      write (*,*) "Other min/max", Z1, Z2
 
 C     Calculates the range of verticle with a x5 exageration
       K=INT(5*(Z2-Z1))+1
@@ -153,13 +173,58 @@ C     Set brightness to 1 at that position
         DN(I,J)=1
       ENDDO
 
+C     Compute the line, use left side which has 0 for x
+C            X position will need an offset for plotting 
+      dist = Q1/2.0
+      iDist = NINT (dist)
+      rightHeight = H(iDist)
+      leftHeight = H(-iDist)
+      write (*,*) "Dist, height (Start/Stop): ", 
+     +             dist, leftHeight, rightHeight
+
+C     Adjust to be width (vs radius)
+      dist = dist * 2
+      m = (rightHeight - leftHeight) / dist
+      b = leftHeight - m * 0
+      write (*,*) "Eqn: y = ", m, "*X + ", b
+
+C     Find the max
+      maxDelta = 0
+      DO I=-Q1,Q1
+        myHeight=H(I)
+        eqn = m * (I + iDist) + b
+        delta = eqn - myHeight
+
+        if ( maxDelta .LT. delta) then
+           maxDelta = delta
+           maxIndex = I
+        endif
+      ENDDO
+      write (*,*) "Maximum found : ", maxDelta, " at index ",maxIndex+Q1
+      write (*,*) "D/d:  ", dist / maxDelta
+
 C     Output the profile in ASCII
       OPEN(UNIT=20, FILE="profile.txt")
       DO I=-Q1,Q1
-        myHeight=H(I)/5.0
-        write (20,*) myHeight
+        myHeight=H(I)
+        eqn = m * (I + iDist) + b
+
+C       Logic for showing crater sides, center and max
+        flag = 0
+        if ( I .EQ. iDist ) flag = 1
+        if ( I .EQ. -iDist ) flag = 1
+        if ( I .EQ. 0 ) flag = 1
+        if ( I .EQ. maxIndex ) flag = 1
+
+C       Print all three if interesting, otherwise made 3rd field blank
+        if ( flag .EQ. 1) then
+              write(20,*)myHeight, eqn, myHeight
+        else 
+              write(20,*)myHeight, eqn
+        endif
       ENDDO
       CLOSE(UNIT=20)
+
 
 C     Output
       INFILE='TEMPFILE.GRAY'
