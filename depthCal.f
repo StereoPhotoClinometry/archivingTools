@@ -42,7 +42,7 @@
       CHARACTER*5000     LINE
 
       LOGICAL            GUSE(-NTMP:NTMP,-NTMP:NTMP)
-      write (*,*)       "Version 1.0"
+      write (*,*)       "Version 1.1"
 
       WRITE(6,*) 'Input mapname'
       READ(5,FMT='(A6)') MAPNM
@@ -229,29 +229,28 @@ C     Set brightness to 1 at that position
         DN(I,J)=1
       ENDDO
 
-C     Compute the line, use left side which has 0 for x
-C            X position will need an offset for plotting 
+C     Compute the line
       dist = Q1/2.0
       iDist = NINT (dist)
       rightHeight = H(iDist)
       leftHeight = H(-iDist)
 
 C     Adjust to be width (vs radius)
-      write (*,*) "Pixels: ", dist*2
+      write (*,*) "Pixels: ", iDist*2
       dist = dist * 2 * SCALE
       write (*,*) "Dist, height (Start/Stop): ", 
      +             dist, leftHeight, rightHeight, UNITS
 
 C     Compute the equation
       m = (rightHeight - leftHeight) / dist
-      b = leftHeight - m * 0
+      b = leftHeight - m * dist/2.0
       write (*,*) "Eqn: y = ", m, "*X + ", b
 
 C     Find the max
       maxDelta = 0
       DO I=-iDist/2,iDist/21
         myHeight=H(I)
-        eqn = m * (I + dist) + b
+        eqn = m * (I*SCALE + dist) + b
         delta = eqn - myHeight
 
         if ( maxDelta .LT. delta) then
@@ -267,7 +266,7 @@ C     Output the profile in ASCII
       OPEN(UNIT=20, FILE="profile.txt")
       DO I=-Q1,Q1
         myHeight=H(I)
-        eqn = m * (I + dist) + b
+        eqn = m * (I*SCALE + dist) + b
 
 C       Logic for showing crater sides, center and max
         flag = 0
