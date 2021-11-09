@@ -2,7 +2,9 @@
       IMPLICIT NONE
 
       INTEGER           NTMP
-      PARAMETER        (NTMP=2501)
+      PARAMETER        (NTMP=5000)
+      INTEGER           D2NTMP
+      PARAMETER        (D2NTMP=20000)
 
       DOUBLE PRECISION  SCALE
       DOUBLE PRECISION  V(3)
@@ -16,7 +18,7 @@
       REAL*4                HT(-NTMP:NTMP,-NTMP:NTMP)
       REAL*4                ALB(-NTMP:NTMP,-NTMP:NTMP)
       REAL*4                G(-NTMP:NTMP,-NTMP:NTMP)
-      REAL*4                H(-NTMP:NTMP)
+      REAL*4                H(-D2NTMP:D2NTMP)
       REAL*4                DN(-NTMP:NTMP,NTMP)
       REAL*4                myHeight
       REAL*4                mi, ma, width, ratio
