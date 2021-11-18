@@ -10,8 +10,7 @@ C           Added a check for NaN for COS for incidence, emission and phase chan
 C  Version 1.4 - 18 Oct 2021 - Eric E. Palmer
 C		Add X/Y/Z Cartisian coordinats to the output
 C  Version 1.5 - 18 Nov 2021 - John R. Weirich
-C		Corrected order of I,J in calculations for lat/emission/etc. also changed order of I,J in the loop
-
+C		Corrected order of I,J in calculations for lat/emission/etc. also changed order of I,J in the loop.
 
       IMPLICIT NONE
 
