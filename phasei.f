@@ -194,8 +194,8 @@ C     Open the files that we will create
 
 C     Loop over the entire array
 C       To match readmap, the fastest change in the 1st index of the array
-      DO J=-QSZ,QSZ                                                     col, X
-      DO I=-QSZ,QSZ                                                     row, Y
+      DO I=-QSZ,QSZ                                                     col, X
+      DO J=-QSZ,QSZ                                                     row, Y
 
 c          tmpl (J,I,1) = 0
 c          tmpl (J,I,2) = 0
