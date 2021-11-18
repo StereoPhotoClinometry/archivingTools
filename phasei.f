@@ -80,7 +80,7 @@ C		Corrected order of I,J in calculations for lat/emission/etc. also changed ord
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.4
+      version = 1.5
 
 
       WRITE(*,*) 'Version:', version
