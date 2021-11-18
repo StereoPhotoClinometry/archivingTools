@@ -13,6 +13,9 @@ C	Version 1.5 - 15 June 2021
 c		Added min/max lat/lon
 C.    Version 1.6 - 2 Sep 2021
 C.          Scaled the verticle height values by 1000 (from km to m)
+C.    Version 1.7 - 18 Nov 2021
+C.          Swapped J and I in many calculations (most important is albedo) to reflect the order of the array.
+
 
       IMPLICIT NONE
 
@@ -78,7 +81,7 @@ C.          Scaled the verticle height values by 1000 (from km to m)
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.6
+      version = 1.7
       WRITE(*,*) 'Version:', version
 
       minLat = 90
