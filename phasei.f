@@ -9,6 +9,8 @@ C  Version 1.3 - 23 Sep 2021 - Eric E. Palmer
 C           Added a check for NaN for COS for incidence, emission and phase chanel
 C  Version 1.4 - 18 Oct 2021 - Eric E. Palmer
 C		Add X/Y/Z Cartisian coordinats to the output
+C  Version 1.5 - 18 Nov 2021 - John R. Weirich
+C		Corrected order of I,J in calculations for lat/emission/etc. also changed order of I,J in the loop
 
 
       IMPLICIT NONE
@@ -193,7 +195,7 @@ C     Open the files that we will create
 
 
 C     Loop over the entire array
-C       To match readmap, the fastest change in the 1st index of the array
+C       To match readmap, the fastest change in the 2nd index of the array
       DO I=-QSZ,QSZ                                                     col, X
       DO J=-QSZ,QSZ                                                     row, Y
 
@@ -226,7 +228,7 @@ C         Look for bad data
   
 
 C         Calculate the angles
-C             Run the fastes array element for the 1st index
+C             Run the fastes array element for the 2nd index
 C         Incidence
           Z1=(SP(3) + TMPL(J,I,1)*SP(1) + TMPL(J,I,2)*SP(2) )/GAMMA
           if (Z1 .GT. 1) then
