@@ -172,8 +172,8 @@ C     Output the file in temp grayscale and ascii
         do j=1,181
           do i=1,361
             cline(i:i)=char(coverage(i,j))
-            write (11, 99) i, j-91, coverage(i,j)
-            write (12, 98) i, j-91, bestRes(i,j)
+            write (11, 99) i, 91-j, coverage(i,j)
+            write (12, 98) i, 91-j, bestRes(i,j)
           enddo
           write(10,rec=j) cline 
         enddo
