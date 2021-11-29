@@ -9,7 +9,8 @@ C  Version 1.3 - 23 Sep 2021 - Eric E. Palmer
 C           Added a check for NaN for COS for incidence, emission and phase chanel
 C  Version 1.4 - 18 Oct 2021 - Eric E. Palmer
 C		Add X/Y/Z Cartisian coordinats to the output
-
+C  Version 1.5 - 18 Nov 2021 - John R. Weirich
+C		Corrected order of I,J in calculations for lat/emission/etc. also changed order of I,J in the loop.
 
       IMPLICIT NONE
 
@@ -78,7 +79,7 @@ C		Add X/Y/Z Cartisian coordinats to the output
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.4
+      version = 1.5
 
 
       WRITE(*,*) 'Version:', version
@@ -193,12 +194,12 @@ C     Open the files that we will create
 
 
 C     Loop over the entire array
-C       To match readmap, the fastest change in the 1st index of the array
-      DO J=-QSZ,QSZ                                                     col, X
-      DO I=-QSZ,QSZ                                                     row, Y
+C       To match readmap, the fastest change in the 2nd index of the array
+      DO I=-QSZ,QSZ                                                     col, X
+      DO J=-QSZ,QSZ                                                     row, Y
 
-c          tmpl (I,J,1) = 0
-c          tmpl (I,J,2) = 0
+c          tmpl (J,I,1) = 0
+c          tmpl (J,I,2) = 0
 C         Recaculate the vector to each pixel
           Z0=HT0(J,I)
           localV(1)=V(1)+SCALE*(J*UY(1)+I*UX(1)+Z0*UZ(1))
@@ -216,30 +217,30 @@ C         Converts into spacecraft frame
           SP(1)= VDOT(SZ,UX)
           SP(2)= VDOT(SZ,UY)
           SP(3)= VDOT(SZ,UZ)
-          GAMMA=SQRT(1+TMPL(I,J,1)**2+TMPL(I,J,2)**2)
+          GAMMA=SQRT(1+TMPL(J,I,1)**2+TMPL(J,I,2)**2)
 
 C         Look for bad data
           if (GAMMA .EQ. 0) then
-             write (*,*) "Gamma null", i, j, TMPL(I,J,1), TMPL(I,J,2)
+             write (*,*) "Gamma null", j, i, TMPL(J,I,1), TMPL(J,I,2)
              exit
           ENDIF
   
 
 C         Calculate the angles
-C             Run the fastes array element for the 1st index
+C             Run the fastes array element for the 2nd index
 C         Incidence
-          Z1=(SP(3) + TMPL(I,J,1)*SP(1) + TMPL(I,J,2)*SP(2) )/GAMMA
+          Z1=(SP(3) + TMPL(J,I,1)*SP(1) + TMPL(J,I,2)*SP(2) )/GAMMA
           if (Z1 .GT. 1) then
-             write (*,*) "Z1 is greater than 1",I,J, Z1, CP, SP, gamma
+             write (*,*) "Z1 is greater than 1",J,I, Z1, CP, SP, gamma
              Z1 = 1
           endif
           ang = ACOS (Z1) / RPD()
           write(10,240, advance="no") ang
 
 C         Emission
-          Z2=(CP(3) + TMPL(I,J,1)*CP(1) + TMPL(I,J,2)*CP(2) )/GAMMA
+          Z2=(CP(3) + TMPL(J,I,1)*CP(1) + TMPL(J,I,2)*CP(2) )/GAMMA
           if (Z2 .gt. 1) then
-             write (*,*) "Z2 is greater than 1", Z2, ANG, "I, J", I, J
+             write (*,*) "Z2 is greater than 1", Z2, ANG, "J, I", J, I
              Z2 = 1 
           ENDIF
           ang = ACOS (Z2) / RPD()
@@ -248,15 +249,15 @@ C         Emission
 C         Phase
           hold = VDOT(CP,SP)
           if (hold .GT. 1) then
-             write (*,*) I,J, hold, CP, SP
+             write (*,*) J,I, hold, CP, SP
              hold = 1
           endif
           ALPHA=ACOS(hold)/RPD()
           write(12,240, advance="no") ALPHA
 
 C         Slope
-          write(13,240, advance="no") (TMPL(I,J,1))
-          write(14,240, advance="no") (TMPL(I,J,2))
+          write(13,240, advance="no") (TMPL(J,I,1))
+          write(14,240, advance="no") (TMPL(J,I,2))
 
 C			Lat and lon
           dist = sqrt (localV(1)**2 + localV(2)**2 + localV(3)**2)

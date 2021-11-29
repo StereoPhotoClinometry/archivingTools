@@ -13,6 +13,9 @@ C	Version 1.5 - 15 June 2021
 c		Added min/max lat/lon
 C.    Version 1.6 - 2 Sep 2021
 C.          Scaled the verticle height values by 1000 (from km to m)
+C.    Version 1.7 - 18 Nov 2021
+C.          Swapped J and I in many calculations (most important is albedo) to reflect the order of the array.
+
 
       IMPLICIT NONE
 
@@ -78,7 +81,7 @@ C.          Scaled the verticle height values by 1000 (from km to m)
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.6
+      version = 1.7
       WRITE(*,*) 'Version:', version
 
       minLat = 90
@@ -143,19 +146,19 @@ C         Recaculate the vector to each pixel
           localV(2)=V(2)+SCALE*(J*UY(2)+I*UX(2)+Z0*UZ(2))
           localV(3)=V(3)+SCALE*(J*UY(3)+I*UX(3)+Z0*UZ(3))
 
-          GAMMA=SQRT(1+TMPL(I,J,1)**2+TMPL(I,J,2)**2)
+          GAMMA=SQRT(1+TMPL(J,I,1)**2+TMPL(J,I,2)**2)
 
 C         Calculate the angles
 C             Run the fastes array element for the 1st index
 C         Albedo
-          write(11,240) (AL0(I,J))
+          write(11,240) (AL0(J,I))
 
 C         SlopeNormal
-          write(12,240) (TMPL(I,J,1))
+          write(12,240) (TMPL(J,I,1))
 
 C         Slope
-          write(13,240) (TMPL(I,J,1))
-          write(14,240) (TMPL(I,J,2))
+          write(13,240) (TMPL(J,I,1))
+          write(14,240) (TMPL(J,I,2))
 
 C			Lat and lon
           dist = sqrt (localV(1)**2 + localV(2)**2 + localV(3)**2)
