@@ -53,7 +53,7 @@ C     Fixed output and array index
       real version
 
 C     Set limiting resolution
-      version = 2.0
+      version = 2.1
       write (*,*) "Version: ", version
       WRITE(6,*) 'Input RESLIM (km/px) Accept everything lower"'
       READ(5,*) RESLIM
@@ -139,9 +139,6 @@ C         Cycle over every pixel
               Z5=Z4*Z5/(-VDOT(W,UZ(1,i,j)))
               USE=USE.AND.(Z5.LE.RESLIM)
 
-              if (Z5 .LT. bestRes (i, j) ) then
-                 bestRes(i,j) = Z5
-              endif
 
 C             Add 1 rather than 15)
               IF(USE) THEN
@@ -149,6 +146,9 @@ C             Add 1 rather than 15)
                 Z6=Z6-VDOT(W,UZ(1,i,j))
                 Z7=Z7+Z5
                 K=K+1
+                if (Z5 .LT. bestRes (i, j) ) then
+                   bestRes(i,j) = Z5
+                endif
               ENDIF
             ENDIF
             ENDIF
