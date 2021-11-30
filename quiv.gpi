@@ -1,0 +1,21 @@
+# Eric E. Palmer - 23 Nov 2021
+# Plots a quiver plot (only the maplets)
+
+set term x11
+unset key
+set xlabel "Longitude [deg]"
+set ylabel "Latitude [deg]"
+set cblabel "Offset [cm]"
+
+set xtics rotate by -90
+
+
+adjust=500.0
+plot 'quiv.txt' u 3:2:($4/adjust):($5/adjust):6 with vectors filled lc palette
+
+set output 'quiv.png' 
+set term png size 512,512
+replot
+unset output
+set term x11
+
