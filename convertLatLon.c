@@ -16,6 +16,48 @@ float	version = 1.2;
 
 #define pi 3.1415926
 
+// This will look to see if the input is good
+void check(FILE *in){
+
+		if (feof (in)) 
+			exit (0);
+
+		char tmpC = fgetc (in);
+
+		if (tmpC == 'D') {
+			fprintf (stderr, "Warning, file is using fortran double.\n");
+			fprintf (stderr, "Change D to E i.e. sci notation should use E.\n");
+			exit (-1);
+		}//if
+
+		switch (tmpC) {
+			case ' ':
+			case '	':
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+			case '\n':
+			case '\r':
+			break;
+
+			default:
+				fprintf (stderr, "Invalid data in file:  %c\n", tmpC);
+				fprintf (stderr, "It should only have digits or E:  %c\n", tmpC);
+				exit (-1);
+			}//switch
+
+
+		ungetc (tmpC, in);
+}//checkIn
+
+//-=-=-=-=-=-=-==-=-=-=-=-=-=
 int main (int argc, char *argv[]) {
 	char	*inFile;
 	char	*extra = 0;
@@ -55,10 +97,18 @@ int main (int argc, char *argv[]) {
 
 	// Loop until it is done
 	while ( feof (in) == 0) {
+		check (in);
 		fscanf (in, "%f", &x);
+		check (in);
 		fscanf (in, "%f", &y);
+		check (in);
 		fscanf (in, "%f", &z);
-		if (extra) fscanf (in, "%f", &val);
+
+		if (extra) {
+			check (in);
+			fscanf (in, "%f", &val);
+		}//if
+
 	
 		// match
 		float dist = sqrt (x*x + y*y + z*z);
