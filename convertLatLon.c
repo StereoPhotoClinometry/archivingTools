@@ -26,7 +26,7 @@ void check(FILE *in){
 
 		if (tmpC == 'D') {
 			fprintf (stderr, "Warning, file is using fortran double.\n");
-			fprintf (stderr, "Change G to E\n");
+			fprintf (stderr, "Change D to E (i.e. sci notation should use "E".\n");
 			exit (-1);
 		}//if
 
