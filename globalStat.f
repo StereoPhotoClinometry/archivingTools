@@ -7,6 +7,8 @@ C  Version 1.0 June 21 1021
 C     Change program name to globalStat
 C     Added image resolution
 C     Output files are global-XXXX.ll
+C  Version 2.1 Nov 30 2021
+C     Fixed output and array index
 
 
       IMPLICIT NONE
@@ -51,7 +53,7 @@ C     Output files are global-XXXX.ll
       real version
 
 C     Set limiting resolution
-      version = 2.0
+      version = 2.1
       write (*,*) "Version: ", version
       WRITE(6,*) 'Input RESLIM (km/px) Accept everything lower"'
       READ(5,*) RESLIM
@@ -73,7 +75,7 @@ C		Initalize variables
       enddo
       enddo
       write (*,*) "Reading from SHAPE.TXT";
-      do i=1,361
+      do i=1,360
       do j=2,180
         z1=91-j
         z2=i-1
@@ -124,7 +126,7 @@ C		Cycle over all images (SUMFILES)
           K=0
 
 C         Cycle over every pixel
-          do i=1,361
+          do i=1,360
           do j=2,180
             CALL VADD(V0,V(1,i,j),W)
             Z5=VNORM(W)
@@ -137,9 +139,6 @@ C         Cycle over every pixel
               Z5=Z4*Z5/(-VDOT(W,UZ(1,i,j)))
               USE=USE.AND.(Z5.LE.RESLIM)
 
-              if (Z5 .LT. bestRes (i, j) ) then
-                 bestRes(i,j) = Z5
-              endif
 
 C             Add 1 rather than 15)
               IF(USE) THEN
@@ -147,6 +146,9 @@ C             Add 1 rather than 15)
                 Z6=Z6-VDOT(W,UZ(1,i,j))
                 Z7=Z7+Z5
                 K=K+1
+                if (Z5 .LT. bestRes (i, j) ) then
+                   bestRes(i,j) = Z5
+                endif
               ENDIF
             ENDIF
             ENDIF
@@ -180,7 +182,7 @@ C     Output the file in temp grayscale and ascii
       close(unit=10)
       close(unit=11)
       close(unit=12)
- 98   format (2i5, f12.8)
+ 98   format (2i5, f18.8)
  99   format (3i5)
 
       write(6,*) 
