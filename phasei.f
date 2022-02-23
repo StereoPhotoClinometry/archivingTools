@@ -11,6 +11,8 @@ C  Version 1.4 - 18 Oct 2021 - Eric E. Palmer
 C		Add X/Y/Z Cartisian coordinats to the output
 C  Version 1.5 - 18 Nov 2021 - John R. Weirich
 C		Corrected order of I,J in calculations for lat/emission/etc. also changed order of I,J in the loop.
+C  Version 1.6 - 23 Feb 2022 - John R. Weirich
+C		Changed East Latitude to go from 0 to 360 instead of -180 180.
 
       IMPLICIT NONE
 
@@ -79,7 +81,7 @@ C		Corrected order of I,J in calculations for lat/emission/etc. also changed ord
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.5
+      version = 1.6
 
 
       WRITE(*,*) 'Version:', version
@@ -263,6 +265,9 @@ C			Lat and lon
           dist = sqrt (localV(1)**2 + localV(2)**2 + localV(3)**2)
           lon =atan2 ( localV(2) , localV(1)) * 180 / 3.1415926
           lat = asin ( localV(3)/dist) * 180/3.1415926
+          if (lon .LT. 0)  then
+             lon = lon + 360
+          endif
           write(15,240, advance="no") lat 
           write(16,240, advance="no") lon 
 
