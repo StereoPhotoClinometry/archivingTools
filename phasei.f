@@ -13,11 +13,15 @@ C  Version 1.5 - 18 Nov 2021 - John R. Weirich
 C		Corrected order of I,J in calculations for lat/emission/etc. also changed order of I,J in the loop.
 C  Version 1.6 - 23 Feb 2022 - John R. Weirich
 C		Changed East Latitude to go from 0 to 360 instead of -180 180.
+C  Version 1.7 - 20 Apr 2022 - John R. Weririch
+C		Modified to allow for larger bigmaps. Q of 2349.
+C		Tried NTMP of 4750 and got a compiling error.
+
 
       IMPLICIT NONE
 
       INTEGER               NTMP
-      PARAMETER            (NTMP=2001)
+      PARAMETER            (NTMP=4699)
 
       DOUBLE PRECISION      SCALE
       DOUBLE PRECISION      V(3)
