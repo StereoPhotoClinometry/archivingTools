@@ -15,12 +15,14 @@ C.    Version 1.6 - 2 Sep 2021
 C.          Scaled the verticle height values by 1000 (from km to m)
 C.    Version 1.7 - 18 Nov 2021
 C.          Swapped J and I in many calculations (most important is albedo) to reflect the order of the array.
+C     Version 1.8 - 9 June 2022
+C           Increased NTMP to 5001 - lets you have a Q of 2500
 
 
       IMPLICIT NONE
 
       INTEGER               NTMP
-      PARAMETER            (NTMP=2001)
+      PARAMETER            (NTMP=5001)
 
       DOUBLE PRECISION      SCALE
       DOUBLE PRECISION      V(3)
