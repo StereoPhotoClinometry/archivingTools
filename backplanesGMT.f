@@ -17,7 +17,9 @@ C.    Version 1.7 - 18 Nov 2021
 C.          Swapped J and I in many calculations (most important is albedo) to reflect the order of the array.
 C     Version 1.8 - 9 June 2022
 C           Increased NTMP to 3001 - lets you have a Q of at least 2242 (Q=2242 didn't work when NTMP=2001)
-
+C     Version 1.81 - 9 June 2022
+C           Output radius updated to double precision. This is needed on large objects with hi-resolution
+C           Ex. Moon with LRO images will only have ~0.125 m accuracy when building to 0.8 m GSD.
 
       IMPLICIT NONE
 
@@ -74,7 +76,8 @@ C           Increased NTMP to 3001 - lets you have a Q of at least 2242 (Q=2242 
       DOUBLE PRECISION      localV(3)
       REAL                  Z0
       REAL                  ang
-      REAL                  dist, lat, lon
+      REAL                  lat, lon
+      DOUBLE PRECISION      dist
 
 
 
@@ -83,7 +86,7 @@ C           Increased NTMP to 3001 - lets you have a Q of at least 2242 (Q=2242 
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.8
+      version = 1.81
       WRITE(*,*) 'Version:', version
 
       minLat = 90
