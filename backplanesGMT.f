@@ -16,13 +16,13 @@ C.          Scaled the verticle height values by 1000 (from km to m)
 C.    Version 1.7 - 18 Nov 2021
 C.          Swapped J and I in many calculations (most important is albedo) to reflect the order of the array.
 C     Version 1.8 - 9 June 2022
-C           Increased NTMP to 5001 - lets you have a Q of 2500
+C           Increased NTMP to 3001 - lets you have a Q of at least 2242 (Q=2242 didn't work when NTMP=2001)
 
 
       IMPLICIT NONE
 
       INTEGER               NTMP
-      PARAMETER            (NTMP=5001)
+      PARAMETER            (NTMP=3001)
 
       DOUBLE PRECISION      SCALE
       DOUBLE PRECISION      V(3)
@@ -83,7 +83,7 @@ C           Increased NTMP to 5001 - lets you have a Q of 2500
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.7
+      version = 1.8
       WRITE(*,*) 'Version:', version
 
       minLat = 90
