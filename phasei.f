@@ -16,7 +16,8 @@ C		Changed East Latitude to go from 0 to 360 instead of -180 180.
 C  Version 1.7 - 20 Apr 2022 - John R. Weririch
 C		Modified to allow for larger bigmaps. Q of 2349.
 C		Tried NTMP of 4750 and got a compiling error.
-
+C  Version 1.8 - 09 June 2022
+C		Now writes out radius, also updated radius to have double precision
 
       IMPLICIT NONE
 
@@ -75,7 +76,8 @@ C		Tried NTMP of 4750 and got a compiling error.
       DOUBLE PRECISION      localV(3)
       REAL                  Z0
       REAL                  ang
-      REAL                  dist, lat, lon
+      REAL                  lat, lon
+      DOUBLE PRECISION      dist
       DOUBLE PRECISION      hold
 
 
@@ -85,7 +87,7 @@ C		Tried NTMP of 4750 and got a compiling error.
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.6
+      version = 1.8
 
 
       WRITE(*,*) 'Version:', version
@@ -197,6 +199,10 @@ C     Open the files that we will create
       OPEN(UNIT=18,FILE=LMRKFILE)
       LMRKFILE=MAP0//'-z.TXT'
       OPEN(UNIT=19,FILE=LMRKFILE)
+      LMRKFILE=MAP0//'-r.TXT'
+      OPEN(UNIT=20,FILE=LMRKFILE)
+      write (*,*) LMRKFILE, " has been scaled x1000, km to m"
+      write (*,*) "Be sure your input BIGMAP is in km"
 
 
 C     Loop over the entire array
@@ -274,6 +280,7 @@ C			Lat and lon
           endif
           write(15,240, advance="no") lat 
           write(16,240, advance="no") lon 
+          write(20,240, advance="no") dist*1000
 
 C         Write out X/Y/Z Cartesian coordintes
           write(17,240, advance="no") localV(1) 
