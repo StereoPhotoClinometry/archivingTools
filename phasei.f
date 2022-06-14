@@ -18,6 +18,8 @@ C		Modified to allow for larger bigmaps. Q of 2349.
 C		Tried NTMP of 4750 and got a compiling error.
 C  Version 1.8 - 09 June 2022
 C		Now writes out radius, also updated radius to have double precision
+C  Version 1.9 - 15 June 2022 - Palmer
+C     Removed radius for clarity.  Changed version to a string
 
       IMPLICIT NONE
 
@@ -53,7 +55,8 @@ C		Now writes out radius, also updated radius to have double precision
       INTEGER               K
       INTEGER               zeros
       INTEGER               NPX, NLN, T1, T2
-      real               version
+c      real               version
+      CHARACTER*80          version
     
       DOUBLE PRECISION      V0(3)
       DOUBLE PRECISION      SZ(3)
@@ -87,7 +90,7 @@ C		Now writes out radius, also updated radius to have double precision
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.8
+      version = "1.9"
 
 
       WRITE(*,*) 'Version:', version
@@ -199,8 +202,6 @@ C     Open the files that we will create
       OPEN(UNIT=18,FILE=LMRKFILE)
       LMRKFILE=MAP0//'-z.TXT'
       OPEN(UNIT=19,FILE=LMRKFILE)
-      LMRKFILE=MAP0//'-r.TXT'
-      OPEN(UNIT=20,FILE=LMRKFILE)
       write (*,*) LMRKFILE, " has been scaled x1000, km to m"
       write (*,*) "Be sure your input BIGMAP is in km"
 
@@ -280,7 +281,6 @@ C			Lat and lon
           endif
           write(15,240, advance="no") lat 
           write(16,240, advance="no") lon 
-          write(20,240, advance="no") dist*1000
 
 C         Write out X/Y/Z Cartesian coordintes
           write(17,240, advance="no") localV(1) 
