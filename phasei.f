@@ -11,11 +11,20 @@ C  Version 1.4 - 18 Oct 2021 - Eric E. Palmer
 C		Add X/Y/Z Cartisian coordinats to the output
 C  Version 1.5 - 18 Nov 2021 - John R. Weirich
 C		Corrected order of I,J in calculations for lat/emission/etc. also changed order of I,J in the loop.
+C  Version 1.6 - 23 Feb 2022 - John R. Weirich
+C		Changed East Latitude to go from 0 to 360 instead of -180 180.
+C  Version 1.7 - 20 Apr 2022 - John R. Weririch
+C		Modified to allow for larger bigmaps. Q of 2349.
+C		Tried NTMP of 4750 and got a compiling error.
+C  Version 1.8 - 09 June 2022
+C		Now writes out radius, also updated radius to have double precision
+C  Version 1.9 - 15 June 2022 - Palmer
+C     Removed radius for clarity.  Changed version to a string
 
       IMPLICIT NONE
 
       INTEGER               NTMP
-      PARAMETER            (NTMP=2001)
+      PARAMETER            (NTMP=4699)
 
       DOUBLE PRECISION      SCALE
       DOUBLE PRECISION      V(3)
@@ -46,7 +55,8 @@ C		Corrected order of I,J in calculations for lat/emission/etc. also changed ord
       INTEGER               K
       INTEGER               zeros
       INTEGER               NPX, NLN, T1, T2
-      real               version
+c      real               version
+      CHARACTER*80          version
     
       DOUBLE PRECISION      V0(3)
       DOUBLE PRECISION      SZ(3)
@@ -69,7 +79,8 @@ C		Corrected order of I,J in calculations for lat/emission/etc. also changed ord
       DOUBLE PRECISION      localV(3)
       REAL                  Z0
       REAL                  ang
-      REAL                  dist, lat, lon
+      REAL                  lat, lon
+      DOUBLE PRECISION      dist
       DOUBLE PRECISION      hold
 
 
@@ -79,7 +90,7 @@ C		Corrected order of I,J in calculations for lat/emission/etc. also changed ord
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.5
+      version = "1.9"
 
 
       WRITE(*,*) 'Version:', version
@@ -191,6 +202,8 @@ C     Open the files that we will create
       OPEN(UNIT=18,FILE=LMRKFILE)
       LMRKFILE=MAP0//'-z.TXT'
       OPEN(UNIT=19,FILE=LMRKFILE)
+      write (*,*) LMRKFILE, " has been scaled x1000, km to m"
+      write (*,*) "Be sure your input BIGMAP is in km"
 
 
 C     Loop over the entire array
@@ -263,6 +276,9 @@ C			Lat and lon
           dist = sqrt (localV(1)**2 + localV(2)**2 + localV(3)**2)
           lon =atan2 ( localV(2) , localV(1)) * 180 / 3.1415926
           lat = asin ( localV(3)/dist) * 180/3.1415926
+          if (lon .LT. 0)  then
+             lon = lon + 360
+          endif
           write(15,240, advance="no") lat 
           write(16,240, advance="no") lon 
 
