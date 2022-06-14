@@ -15,7 +15,7 @@ C		Outputs in matrix format
       IMPLICIT NONE
 
       INTEGER               NTMP
-      PARAMETER            (NTMP=2001)
+      PARAMETER            (NTMP=3001)
 
       DOUBLE PRECISION      SCALE
       DOUBLE PRECISION      V(3)
