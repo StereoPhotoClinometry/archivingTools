@@ -202,9 +202,6 @@ C     Open the files that we will create
       OPEN(UNIT=18,FILE=LMRKFILE)
       LMRKFILE=MAP0//'-z.TXT'
       OPEN(UNIT=19,FILE=LMRKFILE)
-      write (*,*) LMRKFILE, " has been scaled x1000, km to m"
-      write (*,*) "Be sure your input BIGMAP is in km"
-
 
 C     Loop over the entire array
 C       To match readmap, the fastest change in the 2nd index of the array
