@@ -1,6 +1,6 @@
 c  Version 1.0 - 26 Sep 2019- Eric Palmer 
 c	This outputs a set of binary files of i, e, and phase
-c  gfortran phasei.f /usr/local/lib/spicelib.a COMMON.a -O2 -o ~/bin/t.phasei
+c  gfortran backplanesGMT.f /usr/local/lib/spicelib.a  /usr/local/src/v3.0.4/COMMON.a -O2 -o ~/bin/t.backplanesGMT
 c  Version 1.1 - 25 Nov 2020 - Eric E. Palmer
 c		Calculates lat/lon and outputs them also
 c	Version 1.2 - 8 June 2021 - Eric E. Palmer
@@ -20,6 +20,10 @@ C           Increased NTMP to 3001 - lets you have a Q of at least 2242 (Q=2242 
 C     Version 1.81 - 9 June 2022
 C           Output radius updated to double precision. This is needed on large objects with hi-resolution
 C           Ex. Moon with LRO images will only have ~0.125 m accuracy when building to 0.8 m GSD.
+C	Version 1.82 - 13 June 2022
+C		Output elevation relative to datum instead of radius (more accurate values at < 1m)
+C	Version 1.83 - 14 June 2022
+C		Now asks for datum value. And version changed to a string.
 
       IMPLICIT NONE
 
@@ -55,7 +59,8 @@ C           Ex. Moon with LRO images will only have ~0.125 m accuracy when build
       INTEGER               K
       INTEGER               zeros
       INTEGER               NPX, NLN, T1, T2
-      real               version
+C      real               version
+      CHARACTER*80          version
     
       DOUBLE PRECISION      V0(3)
       DOUBLE PRECISION      SZ(3)
@@ -77,7 +82,7 @@ C           Ex. Moon with LRO images will only have ~0.125 m accuracy when build
       REAL                  Z0
       REAL                  ang
       REAL                  lat, lon
-      DOUBLE PRECISION      dist
+      DOUBLE PRECISION      dist, datum
 
 
 
@@ -86,7 +91,7 @@ C           Ex. Moon with LRO images will only have ~0.125 m accuracy when build
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.81
+      version = "1.83"
       WRITE(*,*) 'Version:', version
 
       minLat = 90
@@ -96,6 +101,10 @@ C           Ex. Moon with LRO images will only have ~0.125 m accuracy when build
 
       WRITE(6,*) 'Input map name (only 6 char no MAPFILES and .MAP)'
       READ(5,FMT='(A6)') MAP0
+      WRITE(6,*) 'Input datum (km) to use (read as double precision)'
+      WRITE(6,*) 'Standard for Luna is 1737.4' 
+      READ(5,*) datum
+      WRITE(6,*) 'Datum:', datum
 
       LMRKFILE='MAPFILES/'//MAP0//'.MAP'
       CALL READ_MAP(LMRKFILE,NTMP,QSZ,SCALE,V,UX,UY,UZ,HT0,AL0)
@@ -122,7 +131,7 @@ C     Do the basics for the center pixel
 C     Open the files that we will create
       LMRKFILE=MAP0//'-r.txt'
       OPEN(UNIT=10,FILE=LMRKFILE)
-      write (*,*) LMRKFILE, " has been scaled x1000, km to m"
+      write (*,*) LMRKFILE, " change to datum and scale x1000, km to m"
       write (*,*) "Be sure your input BIGMAP is in km"
 
       LMRKFILE=MAP0//'-alb.txt'
@@ -172,7 +181,7 @@ C			Lat and lon
               lon = lon + 360
           endif
           lat = asin ( localV(3)/dist) * 180/3.1415926
-          write(10,240) dist*1000
+          write(10,240) (dist-datum)*1000
           write(15,241) lon, lat
 
           if ( maxLat .LT. lat ) maxLat = lat
