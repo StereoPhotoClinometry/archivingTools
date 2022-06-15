@@ -1,6 +1,6 @@
 c  Version 1.0 - 26 Sep 2019- Eric Palmer 
 c	This outputs a set of binary files of i, e, and phase
-c  gfortran phasei.f /usr/local/lib/spicelib.a COMMON.a -O2 -o ~/bin/t.phasei
+c  gfortran backplanesISIS.f /usr/local/lib/spicelib.a /usr/local/src/v3.0.4/COMMON.a -O2 -o ~/bin/t.backplanesISIS
 c  Version 1.1 - 25 Nov 2020 - Eric E. Palmer
 c		Calculates lat/lon and outputs them also
 c	Version 1.2 - 8 June 2021 - Eric E. Palmer
@@ -11,6 +11,11 @@ c		Output is in list format
 c		Output file with Lon, Lat Plus channels for H, albedo, slope_pix, slope_norm
 C	Version 1.4 - 14 June 2021
 C		Outputs in matrix format
+C	Version 1.5 - 14 June 2022 
+C		Output user defined elevation relative to datum instead of radius
+C		elevation is double precision
+C		version is now a string
+C		NTMP increased from 2001 to 3001
 
       IMPLICIT NONE
 
@@ -45,7 +50,8 @@ C		Outputs in matrix format
       INTEGER               K
       INTEGER               zeros
       INTEGER               NPX, NLN, T1, T2
-      real               version
+C      real               version
+      CHARACTER*80          version
     
       DOUBLE PRECISION      V0(3)
       DOUBLE PRECISION      SZ(3)
@@ -66,7 +72,8 @@ C		Outputs in matrix format
       DOUBLE PRECISION      localV(3)
       REAL                  Z0
       REAL                  ang
-      REAL                  dist, lat, lon
+      REAL                  lat, lon
+      DOUBLE PRECISION      dist, datum
 
 
 
@@ -75,13 +82,18 @@ C		Outputs in matrix format
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.4
+      version = "1.5"
 
 
       WRITE(*,*) 'Version:', version
 
       WRITE(6,*) 'Input map name (only 6 char no MAPFILES and .MAP)'
       READ(5,FMT='(A6)') MAP0
+      WRITE(6,*) 'Input datum (km) to use (read as double precision)'
+      WRITE(6,*) 'Standard for Luna is 1737.4'
+      READ(5,*) datum
+      WRITE(6,*) 'Datum:', datum
+
 
       LMRKFILE='MAPFILES/'//MAP0//'.MAP'
       CALL READ_MAP(LMRKFILE,NTMP,QSZ,SCALE,V,UX,UY,UZ,HT0,AL0)
@@ -108,6 +120,8 @@ C     Do the basics for the center pixel
 C     Open the files that we will create
       LMRKFILE=MAP0//'-r.txt'
       OPEN(UNIT=10,FILE=LMRKFILE)
+      write (*,*) LMRKFILE, " change to datum and scale x1000, km to m"
+      write (*,*) "Be sure your input BIGMAP is in km"
 
       LMRKFILE=MAP0//'-alb.txt'
       OPEN(UNIT=11,FILE=LMRKFILE)
@@ -159,7 +173,7 @@ C			Lat and lon
               lon = lon + 360
           endif
           lat = asin ( localV(3)/dist) * 180/3.1415926
-          write(10,240, advance="no") dist
+          write(10,240, advance="no") (dist-datum)*1000
           write(15,240, advance="no") lon
           write(16,240, advance="no") lat
 

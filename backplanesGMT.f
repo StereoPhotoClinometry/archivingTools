@@ -21,9 +21,9 @@ C     Version 1.81 - 9 June 2022
 C           Output radius updated to double precision. This is needed on large objects with hi-resolution
 C           Ex. Moon with LRO images will only have ~0.125 m accuracy when building to 0.8 m GSD.
 C	Version 1.82 - 13 June 2022
-C		Output datum instead of radius (more accurate values at < 1m)
+C		Output elevation relative to datum instead of radius (more accurate values at < 1m)
 C	Version 1.83 - 14 June 2022
-C		Now asks for datum value
+C		Now asks for datum value. And version changed to a string.
 
       IMPLICIT NONE
 
@@ -59,7 +59,8 @@ C		Now asks for datum value
       INTEGER               K
       INTEGER               zeros
       INTEGER               NPX, NLN, T1, T2
-      real               version
+C      real               version
+      CHARACTER*80          version
     
       DOUBLE PRECISION      V0(3)
       DOUBLE PRECISION      SZ(3)
@@ -90,7 +91,7 @@ C		Now asks for datum value
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = 1.83
+      version = "1.83"
       WRITE(*,*) 'Version:', version
 
       minLat = 90
