@@ -196,10 +196,8 @@ C     Open the files that we will create
 C -----------------------------------------------------------------------
 C     Loop over the entire array
 C       To match readmap, the fastest change in the 2nd index of the array
-C      DO I=-QSZ,QSZ                                                     col, X
-C      DO J=-QSZ,QSZ                                                     row, Y
-      DO I=0,QSZ
-      DO J=0,QSZ
+      DO I=-QSZ,QSZ                                                     col, X
+      DO J=-QSZ,QSZ                                                     row, Y
 
 C      dx = H0(I,J) - H0(I-1,J)
 C      dy = H0(I,J) - H0(I,J-1)
