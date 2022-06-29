@@ -177,12 +177,6 @@ C     Compute the incidence angle (center pixel)
 C      write (*,*) "Z1 - cos i", Z1
 C      write (*,*) "Deg", ACOS (Z1)/RPD()
 
-C     Compute the emission angle (center pixel)
-C      Z2=(CP(3)+slope(1)*CP(1)+slope(2)*CP(2))/GAMMA
-C      write (*,*) "Z2 - cos e", Z2
-C      write (*,*) "Deg", ACOS (Z2)/RPD()
-C      ALPHA=ACOS(VDOT(CP,SP))/RPD()
-C      write (*,*) "Alpha - phase", ALPHA
 
        write (*,*) "sun"
        write (*,*) sun
@@ -199,12 +193,10 @@ C       To match readmap, the fastest change in the 2nd index of the array
       DO I=-QSZ,QSZ                                                     col, X
       DO J=-QSZ,QSZ                                                     row, Y
 
-C      dx = H0(I,J) - H0(I-1,J)
-C      dy = H0(I,J) - H0(I,J-1)
       
 C     Calculate local normal vector, V1 X V2
-         P(1) = TMPL(I,J,1)
-         P(2) = TMPL(I,J,2)
+         P(1) = TMPL(J,I,1)
+         P(2) = TMPL(J,I,2)
          P(3) = 1
 
 C     Convert into unit vector
@@ -224,12 +216,6 @@ c          CALL VADD(localV,V0,W)
 c          CALL VHAT(W,W)
 
 
-C          CP(1)=-VDOT(W,UX)
-C          CP(2)=-VDOT(W,UY)
-C          CP(3)=-VDOT(W,UZ)
-c          SP(1)= VDOT(SZ,UX)
-c          SP(2)= VDOT(SZ,UY)
-c          SP(3)= VDOT(SZ,UZ)
           GAMMA=SQRT(1+TMPL(J,I,1)**2+TMPL(J,I,2)**2)
 
 C -----------------------------------------------------------------------
@@ -245,7 +231,6 @@ C         Calculate the angles
 C             Run the fastes array element for the 2nd index
 C         Incidence
 
-c          Z1=(SP(3) + TMPL(J,I,1)*SP(1) + TMPL(J,I,2)*SP(2) )/GAMMA
 
           dot = VDOT (sun, P)
 C          write (*,*) "dot:  ", dot
