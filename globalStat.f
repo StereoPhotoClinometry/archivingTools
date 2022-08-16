@@ -56,7 +56,7 @@ C		The pgm is still 361
       real version
 
 C     Set limiting resolution
-      version = 2.1
+      version = 2.2
       write (*,*) "Version: ", version
       WRITE(6,*) 'Input RESLIM (km/px) Accept everything lower"'
       READ(5,*) RESLIM
