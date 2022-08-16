@@ -9,6 +9,9 @@ C     Added image resolution
 C     Output files are global-XXXX.ll
 C  Version 2.1 Nov 30 2021
 C     Fixed output and array index
+C	Version 2.2 - Aug 16th 2022
+C		Changed the output to go from 1-360, rather than 361
+C		The pgm is still 361
 
 
       IMPLICIT NONE
@@ -172,7 +175,7 @@ C     Output the file in temp grayscale and ascii
       outfile='global-res.ll'
       open (unit=12, file=outfile)
         do j=1,181
-          do i=1,361
+          do i=1,360
             cline(i:i)=char(coverage(i,j))
             write (11, 99) i, 91-j, coverage(i,j)
             write (12, 98) i, 91-j, bestRes(i,j)
