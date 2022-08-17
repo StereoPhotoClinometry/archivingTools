@@ -88,7 +88,7 @@ void loadGrid(char *filename, float grid[180][360]) {
 		//lat += 90;		// go from 0-180 rather than -90 to 90
 		iLat = (int) lat;
 		iLon = (int) lon;
-		grid [iLat][iLon] = r;
+		grid [iLat][iLon] = sig;
 	}//for
 
 	fprintf (stdout, "# Max %8.3f (%3.1f Lat %3.1f Lon)\n", maxVal, maxLat, maxLon);
