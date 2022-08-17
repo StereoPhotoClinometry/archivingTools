@@ -66,7 +66,7 @@ void loadGrid(char *filename, float grid[180][360]) {
       float x, y, z, sig;
       float lat, lon, r;
 
-      fscanf (in, "%f %f %f\n", &x, &y, &z);
+      fscanf (in, "%f %f %f %f\n", &x, &y, &z, &sig);
       x *= 1000;     // convert to meters
       y *= 1000;     // convert to meters
       z *= 1000;     // convert to meters
@@ -79,7 +79,7 @@ void loadGrid(char *filename, float grid[180][360]) {
       if (lon < 0) lon += 360;
       lon = 360 - lon;     // Switching to W Lon
 
-      if (r > maxVal) {
+      if (sig > maxVal) {
          maxVal = sig;
          maxLat = lat;
          maxLon = lon;
@@ -90,6 +90,8 @@ void loadGrid(char *filename, float grid[180][360]) {
 		iLon = (int) lon;
 		grid [iLat][iLon] = r;
 	}//for
+
+	fprintf (stdout, "# Max %8.3f (%3.1f Lat %3.1f Lon)\n", maxVal, maxLat, maxLon);
 
 }//
 
@@ -125,28 +127,13 @@ int main (int argc, char *argv[])
 	for (i=0; i<180; i++){
 		for (j=0; j<360; j++) {
 
-			sum += grid1[i][j] ;
-
-			if (max < grid1[i][j]) {
-				max = grid1[i][j];
-				mLat = i;
-				mLon = j;
-			}//if
-
 			fprintf (out, "%3.5e	", grid1 [i][j]);
 		}//forj
 		fprintf (out, "\n");
 	}//fori
 
-	//fprintf (stderr, "# RMS %3.3f\n", sqrt (sum/360.0/180.0));
-	//fprintf (out, "# RMS %3.3f\n", sqrt (sum/360.0/180.0));
-	fprintf (stderr, "# Max %3.3f (%d Lat %d Lon)\n", max, 90-mLat, mLon);
 	fclose (out);
 
-	float mean1 = meanVal (grid1);
-	float difference = mean1 ;
-	printf ("# Mean Val %3.4f	\n", mean1);
-	//adjustGrid (grid1,  difference);
 
 
 }//main
