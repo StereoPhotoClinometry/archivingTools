@@ -77,7 +77,7 @@ void loadGrid(char *filename, float grid[180][360]) {
       //lat = 90 - lat;
       lon *= 180/3.1415;
       if (lon < 0) lon += 360;
-      lon = 360 - lon;     // Switching to W Lon
+//      lon = 360 - lon;     // Switching to W Lon
 
       if (sig > maxVal) {
          maxVal = sig;
