@@ -1,6 +1,6 @@
 // vector2Grid - Eric E. Palmer - 16 July 2022
-//		Converts an ICQ formatted data (x,y,z,value) and put it into
-//			a 1x1 degree grid
+//		Converts a 4 column ICQ formatted data (x,y,z,value) and put it into
+//			a 1x1 degree grid.
 // Suggest plotting the data:  plot 'grid.txt' u 1:2:3 matrix palette pt 5
 // Version 1.0 - First
 
