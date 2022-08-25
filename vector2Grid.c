@@ -3,7 +3,7 @@
 //			a 1x1 degree grid
 // Suggest plotting the data:  plot 'grid.txt' u 1:2:3 matrix palette pt 5
 // Version 1.0 - First
-// Version 1.1 - 25 Aug 2022 - added interpolation
+// Version 1.1 - 25 Aug 2022 - added interpolation.  -1 values are not propagated
 
 #include <math.h>
 #include <stdio.h>
@@ -150,7 +150,7 @@ int main (int argc, char *argv[])
 		
 
 		// skip if neighbor is empty
-		if (grid1 [di][dj] == 0)  continue;
+		if (grid1 [di][dj] <= 0)  continue;
 
 		// If random neighbor has a value, assign it
 		grid1 [i][j] = grid1 [di][dj];
