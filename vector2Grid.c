@@ -100,7 +100,7 @@ void loadGrid(char *filename, float grid[180][360]) {
 ////////////////////////////////////////////////////////////
 int main (int argc, char *argv[])
 {
-	char *vers = "Version 1.00a";
+	char *vers = "Version 1.10a";
 	char *str1;
 	if (argc == 2) {
 		str1 = argv [1];
@@ -153,7 +153,7 @@ int main (int argc, char *argv[])
 		if (grid1 [di][dj] == 0)  continue;
 
 		// If random neighbor has a value, assign it
-		//grid1 [i][j] = grid1 [di][dj];
+		grid1 [i][j] = grid1 [di][dj];
 		num--;
 		//printf ("%d %d %d %3.3f\n", num, di, dj, grid1[di][dj]);
 	
