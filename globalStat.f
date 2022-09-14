@@ -12,6 +12,10 @@ C     Fixed output and array index
 C	Version 2.2 - Aug 16th 2022
 C		Changed the output to go from 1-360, rather than 361
 C		The pgm is still 361
+C  Version 2.3 - Sep 12, 2022
+C     Made output in both grid and vector
+C     Complies with grid.txt or c1.txt, c2.txt etc
+C     Removed the generation of the pgm
 
 
       IMPLICIT NONE
@@ -56,7 +60,7 @@ C		The pgm is still 361
       real version
 
 C     Set limiting resolution
-      version = 2.2
+      version = 2.3
       write (*,*) "Version: ", version
       WRITE(6,*) 'Input RESLIM (km/px) Accept everything lower"'
       READ(5,*) RESLIM
@@ -158,6 +162,8 @@ C             Add 1 rather than 15)
             ENDIF
           enddo
           enddo
+
+C         Maybe test over valid data
           IF(K.NE.0) THEN
             Z6=Z6/K
             Z7=Z7/K
@@ -168,39 +174,54 @@ C             Add 1 rather than 15)
       close(unit=20)
 
 C     Output the file in temp grayscale and ascii
-      open (unit=10, file='coverage.gray', access='direct', 
-     .      recl=361, status='unknown')
-      outfile='global-cov.ll'
+c      open (unit=10, file='coverage.gray', access='direct', 
+c     .      recl=361, status='unknown')
+C     Vector formats
+      outfile='global-cov.c3.txt'
       open (unit=11, file=outfile)
-      outfile='global-res.ll'
+      outfile='global-res.c3.txt'
       open (unit=12, file=outfile)
+
+C     Gridded formats
+      outfile='global-cov.grid.txt'
+      open (unit=13, file=outfile)
+      outfile='global-res.grid.txt'
+      open (unit=14, file=outfile)
         do j=1,181
           do i=1,360
             cline(i:i)=char(coverage(i,j))
             write (11, 99) i, 91-j, coverage(i,j)
             write (12, 98) i, 91-j, bestRes(i,j)
+            write (13, 96, advance="no") coverage(i,j)
+            write (14, 97, advance="no") bestRes(i,j)
           enddo
           write(10,rec=j) cline 
+          write(13) 
+          write(14) 
         enddo
-      close(unit=10)
+c      close(unit=10)
       close(unit=11)
       close(unit=12)
+      close(unit=13)
+      close(unit=14)
+ 96   format (i7)
+ 97   format (f229.8)
  98   format (2i5, f18.8)
  99   format (3i5)
 
-      write(6,*) 
-      write(6,*) 'coverage done'
-
-
-C     Generate the PGM
-      npx=361
-      nln=181
-      infile='coverage.gray'
-      outfile='coverage_p.pgm'
-      call raw2pgm(infile,outfile,npx,nln)
-      write(6,*) 'gc coverage_p.pgm'
-      open (unit=10, file='coverage.gray', status='unknown')
-      close(unit=10, status='delete')
+c      write(6,*) 
+c      write(6,*) 'coverage done'
+c
+c
+cC     Generate the PGM
+c      npx=361
+c      nln=181
+c      infile='coverage.gray'
+c      outfile='coverage_p.pgm'
+c      call raw2pgm(infile,outfile,npx,nln)
+c      write(6,*) 'gc coverage_p.pgm'
+c      open (unit=10, file='coverage.gray', status='unknown')
+c      close(unit=10, status='delete')
 
       STOP
       END
