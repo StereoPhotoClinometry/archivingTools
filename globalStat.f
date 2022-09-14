@@ -82,11 +82,12 @@ C		Initalize variables
       enddo
       enddo
       write (*,*) "Reading from SHAPE.TXT";
-      do i=1,360
+      do i=2,360
       do j=2,180
         z1=91-j
         z2=i-1
         CALL LATREC(1.d0,Z2*RPD(),Z1*RPD(), W)
+        write (*,*) I,J
         CALL U2VN(W,V(1,I,J),UZ(1,I,J))
       enddo
       write (*,"(A1)", advance="no") "."
@@ -99,6 +100,7 @@ C		Cycle over all images (SUMFILES)
         if(xname(1:1).eq.'!') go to 10
         if(xname(1:1).eq.'#') go to 10
         IF(xname(1:3).ne.'END') then
+          write (*,*) xname
           PICNM=XNAME(2:13)
           I=SLEN(PICNM)
           PICTFILE='./SUMFILES/'//PICNM(1:I)//'.SUM'
@@ -172,6 +174,7 @@ C         Maybe test over valid data
           go to 10
         ENDIF
       close(unit=20)
+      write (*,*) "done thinking"
 
 C     Output the file in temp grayscale and ascii
 c      open (unit=10, file='coverage.gray', access='direct', 
@@ -181,31 +184,35 @@ C     Vector formats
       open (unit=11, file=outfile)
       outfile='global-res.c3.txt'
       open (unit=12, file=outfile)
+    
+      write (*,*) "Pre grid"
 
 C     Gridded formats
-      outfile='global-cov.grid.txt'
-      open (unit=13, file=outfile)
-      outfile='global-res.grid.txt'
-      open (unit=14, file=outfile)
+C      outfile='global-cov.grid.txt'
+C      open (unit=13, file=outfile)
+C      outfile='global-res.grid.txt'
+C      open (unit=14, file=outfile)
         do j=1,181
           do i=1,360
             cline(i:i)=char(coverage(i,j))
             write (11, 99) i, 91-j, coverage(i,j)
             write (12, 98) i, 91-j, bestRes(i,j)
-            write (13, 96, advance="no") coverage(i,j)
-            write (14, 97, advance="no") bestRes(i,j)
+C            write (13, 96, advance="no") coverage(i,j)
+C            write (14, 97, advance="no") bestRes(i,j)
           enddo
-          write(10,rec=j) cline 
-          write(13) 
-          write(14) 
+c          write(10,rec=j) cline 
+C          write(13) 
+C          write(14) 
         enddo
+
+      write (*,*) "done grid"
 c      close(unit=10)
       close(unit=11)
       close(unit=12)
-      close(unit=13)
-      close(unit=14)
+C      close(unit=13)
+C      close(unit=14)
  96   format (i7)
- 97   format (f229.8)
+ 97   format (f22.8)
  98   format (2i5, f18.8)
  99   format (3i5)
 
