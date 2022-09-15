@@ -163,6 +163,8 @@ C             Add 1 rather than 15)
           enddo
           enddo
 
+          WRITE (6,*) 
+          WRITE (6,*) "PICTName	Average_angle	Average_res"
 C         Maybe test over valid data
           IF(K.NE.0) THEN
             Z6=Z6/K
