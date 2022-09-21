@@ -82,8 +82,8 @@ C		Initalize variables
       enddo
       enddo
       write (*,*) "Reading from SHAPE.TXT";
-      do i=2,360
-      do j=1,180
+      do i=1,360
+      do j=2,180
         z1=91-j
         z2=i-1
         CALL LATREC(1.d0,Z2*RPD(),Z1*RPD(), W)
