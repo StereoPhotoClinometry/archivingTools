@@ -1,5 +1,6 @@
 # Eric E Palmer - 15 Nov 2022
 # Reformats OBJ to be fixed width table
+# Usage: awk -f reformatObj.awk old.obj > new.obj
 
 /v/ { 
 		count += 1; 
