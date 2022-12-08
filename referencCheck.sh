@@ -23,7 +23,7 @@ mkdir -p tmpDir
 
 awk -f /opt/local/spc/bin/getLmk.awk $file > tmpDir/tmp2
 
-list=`cat tmpDir/tmp1`
+list=`cat tmpDir/tmp2`
 
 for item in $list
 do
