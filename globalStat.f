@@ -16,6 +16,8 @@ C  Version 2.3 - Sep 12, 2022
 C     Made output in both grid and vector
 C     Complies with grid.txt or c1.txt, c2.txt etc
 C     Removed the generation of the pgm
+C  Version 2.4 - 29 Sep 2022
+C	Max res now output as meters instead of kilometers
 
 
       IMPLICIT NONE
@@ -60,7 +62,7 @@ C     Removed the generation of the pgm
       real version
 
 C     Set limiting resolution
-      version = 2.3
+      version = 2.4
       write (*,*) "Version: ", version
       WRITE(6,*) 'Input RESLIM (km/px) Accept everything lower"'
       READ(5,*) RESLIM
@@ -78,7 +80,7 @@ C		Initalize variables
       do i=1,361
       do j=1,181
         coverage(i,j)=0
-        bestRes(i,j)=99999
+        bestRes(i,j)=999999
       enddo
       enddo
       write (*,*) "Reading from SHAPE.TXT";
@@ -153,8 +155,9 @@ C             Add 1 rather than 15)
                 Z6=Z6-VDOT(W,UZ(1,i,j))
                 Z7=Z7+Z5
                 K=K+1
-                if (Z5 .LT. bestRes (i, j) ) then
-                   bestRes(i,j) = Z5
+C		Multiply Z5 by 1000 to convert km to m
+                if (1000*Z5 .LT. bestRes (i, j) ) then
+                   bestRes(i,j) = 1000*Z5
                 endif
               ENDIF
             ENDIF
