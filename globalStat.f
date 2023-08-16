@@ -18,7 +18,8 @@ C     Complies with grid.txt or c1.txt, c2.txt etc
 C     Removed the generation of the pgm
 C  Version 2.4 - 29 Sep 2022
 C	Max res now output as meters instead of kilometers
-
+C  Version 2.5 - 15 Aug 2023
+C	Changed output to be 360 by 180
 
       IMPLICIT NONE
       
@@ -62,7 +63,7 @@ C	Max res now output as meters instead of kilometers
       real version
 
 C     Set limiting resolution
-      version = 2.4
+      version = 2.5
       write (*,*) "Version: ", version
       WRITE(6,*) 'Input RESLIM (km/px) Accept everything lower"'
       READ(5,*) RESLIM
