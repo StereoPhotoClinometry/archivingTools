@@ -105,6 +105,11 @@ C           Check boundaries
             i = 1 + nint(lon)
             j = nint(90 - (ltd+.5))
 
+            if (i .lt. 1) write (*,*) map(imap), i,j
+            if (j .lt. 1) write (*,*) map(imap), i,j
+            if (i .gt. 360) write (*,*) map(imap), i,j
+            if (j .gt. 180) write (*,*) map(imap), i,j
+
 C           Set flag that this box has coverage
 C           Set the best resolution
             if(dcoverage(i,j).eq.0) then
