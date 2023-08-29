@@ -102,7 +102,7 @@ C Set up Dynamic memory
 
 
 C Version of the code
-      version = "1.9"
+      version = "1.10"
       WRITE(*,*) 'Version:', version
 
 C What map name do you want
