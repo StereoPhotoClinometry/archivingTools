@@ -96,9 +96,9 @@ C Set up Dynamic memory
       real*4, allocatable :: HT0(:,:)
       real*4, allocatable :: TMPL(:,:, :)
 
-      allocate (AL0(NTMP*2+1,NTMP*2+1))
-      allocate (HT0(NTMP*2+1,NTMP*2+1))
-      allocate (TMPL(NTMP*2+1,NTMP*2+1, 3))
+      allocate (AL0 (-NTMP:NTMP,-NTMP:NTMP))
+      allocate (HT0 (-NTMP:NTMP,-NTMP:NTMP))
+      allocate (TMPL(-NTMP:NTMP,-NTMP:NTMP, 3))
 
 
 C Version of the code
@@ -108,6 +108,7 @@ C Version of the code
 C What map name do you want
       WRITE(6,*) 'Input map name (only 6 char no MAPFILES and .MAP)'
       READ(5,FMT='(A6)') MAP0
+      write (*,*) "Map:  ", MAP0
 
       LMRKFILE='MAPFILES/'//MAP0//'.MAP'
       CALL READ_MAP(LMRKFILE,NTMP,QSZ,SCALE,V,UX,UY,UZ,HT0,AL0)
@@ -117,7 +118,6 @@ C What map name do you want
       write (*,*) "    Uy", UY
       write (*,*) "    Uz", UZ
       write (*,*) "    QSZ", QSZ
-
 
 C What image are we working with
       WRITE(6,*) 'Input image name'
