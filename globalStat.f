@@ -18,7 +18,8 @@ C     Complies with grid.txt or c1.txt, c2.txt etc
 C     Removed the generation of the pgm
 C  Version 2.4 - 29 Sep 2022
 C	Max res now output as meters instead of kilometers
-
+C  Version 2.5 - 15 Aug 2023
+C	Changed output to be 360 by 180
 
       IMPLICIT NONE
       
@@ -26,13 +27,13 @@ C	Max res now output as meters instead of kilometers
       DOUBLE PRECISION      VNORM
       DOUBLE PRECISION      RPD
       DOUBLE PRECISION      V0(3)
-      DOUBLE PRECISION      V(3,361,181)
+      DOUBLE PRECISION      V(3,360,180)
       DOUBLE PRECISION      W(3)
       DOUBLE PRECISION      CX(3)
       DOUBLE PRECISION      CY(3)
       DOUBLE PRECISION      CZ(3)
       DOUBLE PRECISION      SZ(3)
-      DOUBLE PRECISION      UZ(3,361,181)
+      DOUBLE PRECISION      UZ(3,360,180)
       DOUBLE PRECISION      CTR(2)
       DOUBLE PRECISION      MMFL
       DOUBLE PRECISION      KMAT(2,3)
@@ -40,9 +41,9 @@ C	Max res now output as meters instead of kilometers
       DOUBLE PRECISION      IMGPL(2)
       DOUBLE PRECISION      RESLIM
       DOUBLE PRECISION      Z1, Z2, Z3, Z4, Z5, Z6, Z7
-      REAL    bestRes(361,181)
+      REAL    bestRes(360,180)
 
-      INTEGER               coverage(361,181)
+      INTEGER               coverage(360,180)
       INTEGER               NPX, NLN
       INTEGER               I
       INTEGER               J
@@ -56,13 +57,13 @@ C	Max res now output as meters instead of kilometers
       CHARACTER*72          INFILE
       CHARACTER*72          OUTFILE
       CHARACTER*80          LINE
-      character*361         cline
+      character*360         cline
 
       LOGICAL               USE
       real version
 
 C     Set limiting resolution
-      version = 2.4
+      version = 2.5
       write (*,*) "Version: ", version
       WRITE(6,*) 'Input RESLIM (km/px) Accept everything lower"'
       READ(5,*) RESLIM
@@ -77,17 +78,22 @@ C		Use all unless coverage_p.in
 
 
 C		Initalize variables
-      do i=1,361
-      do j=1,181
+      do i=1,360
+      do j=1,180
         coverage(i,j)=0
         bestRes(i,j)=999999
       enddo
       enddo
-      write (*,*) "Reading from SHAPE.TXT";
+
+
+C     Sets the position for each lat/lon grid box
+C          V_ij used later
+C     Adding .5 to each.  Thus, index 90, 180 is actually 
+C                    lat 90.5 and lon 180.5
       do i=1,360
-      do j=2,180
-        z1=91-j
-        z2=i-1
+      do j=1,180
+        z1=91-j - .5
+        z2=i - .5
         CALL LATREC(1.d0,Z2*RPD(),Z1*RPD(), W)
         CALL U2VN(W,V(1,I,J),UZ(1,I,J))
       enddo
@@ -136,7 +142,7 @@ C		Cycle over all images (SUMFILES)
 
 C         Cycle over every pixel
           do i=1,360
-          do j=2,180
+          do j=1,180
             CALL VADD(V0,V(1,i,j),W)
             Z5=VNORM(W)
             CALL VHAT(W,W)
@@ -193,7 +199,7 @@ C     Gridded formats
       open (unit=13, file=outfile)
       outfile='global-res.grid.txt'
       open (unit=14, file=outfile)
-        do j=1,181
+        do j=1,180
           do i=1,360
             cline(i:i)=char(coverage(i,j))
             write (11, 99) i, 91-j, coverage(i,j)
