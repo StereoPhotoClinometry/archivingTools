@@ -14,6 +14,7 @@ lmkList=$1
 if [ "$lmkList" == "" ]
 then
 	lmkList=`ls $dir/LMKFILES | cut -c 1-6`
+	pictList=`ls $dir/LMKFILES | cut -c 1-6`
 else
 	doOver=1
 fi
