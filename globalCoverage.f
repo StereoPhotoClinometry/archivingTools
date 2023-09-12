@@ -15,7 +15,8 @@ C  Version 1.1
       INTEGER         KOUNT      
       integer*4       imax, jmax, imap, nmap
       integer*4       coverage(360,180), dcoverage(360,180)
-      real*4          bestGSD(360,180), gsd
+      real*4          bestGSD(360,180), temp
+      real*4          gsd
 
       real*8          vk(3,mx2,mx2), alb(mx2,mx2)
 
@@ -114,7 +115,6 @@ C           Check boundaries
             j = aint( (90 - ltd ) +.99999999)
 
 
-            write (*,*) map(imap), i,j, lon, ltd, bestGSD(i,j)
             if (i .lt. 1) write (*,*) "Err i: ", map(imap), i,j, lon
             if (j .lt. 1) write (*,*) "Err i: ", map(imap), i,j, ltd
             if (i .gt. 360) write (*,*) "Err j: ", map(imap), i,j, lon
@@ -122,7 +122,6 @@ C           Check boundaries
 
 C           Set flag that this box has coverage
 C           Set the best resolution
-C wrong            if(dcoverage(i,j).eq.0) then
             if ( (gsd .ge. covmin) .and. (gsd .le. covmax) ) then
               dcoverage(i,j)=1
               if (bestGSD(i,j) .gt. gsd) then
@@ -159,7 +158,7 @@ C     Output the data
       write(6,*) 
       write(6,*) 'Global Coverage of maplets done.  Output: ', outfile
 
-C     Get the min value for padding the S pole
+C     Get the min value for padding the poles
       gsd = 9999
       do j=1,180
         gsd = min (gsd, bestGSD(j,180))
@@ -171,10 +170,11 @@ C     Output the data
 
         do j=1,180
           do i=1,360
-C           interpolate data to other points
-            if (bestGSD(i,j) .gt. 9990) then
-              bestGSD(i,j) = gsd
-              endif
+
+C           Have no data, so interpolate data to other points
+c            if (bestGSD(i,j) .gt. 9990) then
+c              bestGSD(i,j) = gsd
+c            endif
             write (11, 97, advance="no") bestGSD(i,j)
           enddo
           write(11, *)
