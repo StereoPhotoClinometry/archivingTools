@@ -4,6 +4,7 @@ C	Reports out how many landmarks over the surface
 C  Reports (in matrix) the best GSD for that grid/box
 C		Limb check was removed
 C		This only displays maplets with images
+C  Version 1.1
 
 
       implicit none
@@ -31,6 +32,10 @@ C		This only displays maplets with images
       character*2048  cline
 
       logical         ex
+
+      real            version 
+      version = 1.1
+      write (*,*) "Version:  ", version
 
       J=2
 
@@ -92,6 +97,7 @@ C           set flag to 0
             enddo
             enddo
 
+C           Loop over the full maplet grid
             do j0=1,jmax
             do i0=1,imax
             if(alb(i0,j0).gt.(0.005)) then
@@ -102,13 +108,13 @@ C           set flag to 0
 C           Check boundaries
             if(lon .lt. 0) lon=lon+360
             if(lon .gt. 360) lon=lon-360
-            i = 1 + nint(lon)
-            j = nint(90 - (ltd+.5))
+            i = 1 + aint(lon)
+            j = aint( (90 - ltd ) +.99999999)
 
-            if (i .lt. 1) write (*,*) map(imap), i,j
-            if (j .lt. 1) write (*,*) map(imap), i,j
-            if (i .gt. 360) write (*,*) map(imap), i,j
-            if (j .gt. 180) write (*,*) map(imap), i,j
+            if (i .lt. 1) write (*,*) "Err i: ", map(imap), i,j, lon
+            if (j .lt. 1) write (*,*) "Err i: ", map(imap), i,j, ltd
+            if (i .gt. 360) write (*,*) "Err j: ", map(imap), i,j, lon
+            if (j .gt. 180) write (*,*) "Err j: ", map(imap), i,j, ltd
 
 C           Set flag that this box has coverage
 C           Set the best resolution
