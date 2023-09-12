@@ -73,6 +73,8 @@ c ......................................
 
       write(6,*) 'Input scale min/max (km)'
       read(5,*) covmin, covmax
+      covmin = covmin * 1000
+      covmax = covmax * 1000
 
 C     Set output to zero
       do i=1,360
@@ -111,6 +113,8 @@ C           Check boundaries
             i = 1 + aint(lon)
             j = aint( (90 - ltd ) +.99999999)
 
+
+            write (*,*) map(imap), i,j, lon, ltd, bestGSD(i,j)
             if (i .lt. 1) write (*,*) "Err i: ", map(imap), i,j, lon
             if (j .lt. 1) write (*,*) "Err i: ", map(imap), i,j, ltd
             if (i .gt. 360) write (*,*) "Err j: ", map(imap), i,j, lon
@@ -118,7 +122,8 @@ C           Check boundaries
 
 C           Set flag that this box has coverage
 C           Set the best resolution
-            if(dcoverage(i,j).eq.0) then
+C wrong            if(dcoverage(i,j).eq.0) then
+            if ( (gsd .ge. covmin) .and. (gsd .le. covmax) ) then
               dcoverage(i,j)=1
               if (bestGSD(i,j) .gt. gsd) then
                  bestGSD(i,j) = gsd
