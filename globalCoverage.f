@@ -4,6 +4,7 @@ C	Reports out how many landmarks over the surface
 C  Reports (in matrix) the best GSD for that grid/box
 C		Limb check was removed
 C		This only displays maplets with images
+C  Version 1.1
 
 
       implicit none
@@ -14,7 +15,8 @@ C		This only displays maplets with images
       INTEGER         KOUNT      
       integer*4       imax, jmax, imap, nmap
       integer*4       coverage(360,180), dcoverage(360,180)
-      real*4          bestGSD(360,180), gsd
+      real*4          bestGSD(360,180), temp
+      real*4          gsd
 
       real*8          vk(3,mx2,mx2), alb(mx2,mx2)
 
@@ -31,6 +33,10 @@ C		This only displays maplets with images
       character*2048  cline
 
       logical         ex
+
+      real            version 
+      version = 1.1
+      write (*,*) "Version:  ", version
 
       J=2
 
@@ -68,6 +74,8 @@ c ......................................
 
       write(6,*) 'Input scale min/max (km)'
       read(5,*) covmin, covmax
+      covmin = covmin * 1000
+      covmax = covmax * 1000
 
 C     Set output to zero
       do i=1,360
@@ -92,6 +100,7 @@ C           set flag to 0
             enddo
             enddo
 
+C           Loop over the full maplet grid
             do j0=1,jmax
             do i0=1,imax
             if(alb(i0,j0).gt.(0.005)) then
@@ -102,17 +111,18 @@ C           set flag to 0
 C           Check boundaries
             if(lon .lt. 0) lon=lon+360
             if(lon .gt. 360) lon=lon-360
-            i = 1 + nint(lon)
-            j = nint(90 - (ltd+.5))
+            i = 1 + aint(lon)
+            j = aint( (90 - ltd ) +.99999999)
 
-            if (i .lt. 1) write (*,*) map(imap), i,j
-            if (j .lt. 1) write (*,*) map(imap), i,j
-            if (i .gt. 360) write (*,*) map(imap), i,j
-            if (j .gt. 180) write (*,*) map(imap), i,j
+
+            if (i .lt. 1) write (*,*) "Err i: ", map(imap), i,j, lon
+            if (j .lt. 1) write (*,*) "Err i: ", map(imap), i,j, ltd
+            if (i .gt. 360) write (*,*) "Err j: ", map(imap), i,j, lon
+            if (j .gt. 180) write (*,*) "Err j: ", map(imap), i,j, ltd
 
 C           Set flag that this box has coverage
 C           Set the best resolution
-            if(dcoverage(i,j).eq.0) then
+            if ( (gsd .ge. covmin) .and. (gsd .le. covmax) ) then
               dcoverage(i,j)=1
               if (bestGSD(i,j) .gt. gsd) then
                  bestGSD(i,j) = gsd
@@ -148,7 +158,7 @@ C     Output the data
       write(6,*) 
       write(6,*) 'Global Coverage of maplets done.  Output: ', outfile
 
-C     Get the min value for padding the S pole
+C     Get the min value for padding the poles
       gsd = 9999
       do j=1,180
         gsd = min (gsd, bestGSD(j,180))
@@ -160,10 +170,11 @@ C     Output the data
 
         do j=1,180
           do i=1,360
-C           interpolate data to other points
-            if (bestGSD(i,j) .gt. 9990) then
-              bestGSD(i,j) = gsd
-              endif
+
+C           Have no data, so interpolate data to other points
+c            if (bestGSD(i,j) .gt. 9990) then
+c              bestGSD(i,j) = gsd
+c            endif
             write (11, 97, advance="no") bestGSD(i,j)
           enddo
           write(11, *)
