@@ -159,7 +159,7 @@ C     Output the data
       write(6,*) 'Global Coverage of maplets done.  Output: ', outfile
 
 C     Get the min value for padding the poles
-      gsd = 9999
+      gsd = 999999
       do j=1,180
         gsd = min (gsd, bestGSD(j,180))
       enddo
@@ -172,7 +172,7 @@ C     Output the data
           do i=1,360
 
 C           Have no data, so interpolate data to other points
-c            if (bestGSD(i,j) .gt. 9990) then
+c            if (bestGSD(i,j) .gt. 999000) then
 c              bestGSD(i,j) = gsd
 c            endif
             write (11, 97, advance="no") bestGSD(i,j)
