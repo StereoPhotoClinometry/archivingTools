@@ -33,9 +33,18 @@ c  This will shift the center vector in cartisian space
       write (*,*) "Version: ", version
       WRITE(6,*) 'Input input map name'
       READ(5,FMT='(A6)') MAP0
-      WRITE(6,*) 'Input output map name'
+      WRITE(6,*) 'Input output map name [6 char]'
       READ(5,FMT='(A6)') MAP1
 
+      if (MAP0 .EQ. MAP1) then
+        write (*,*) "Error:  Cannot be the same name"
+        stop
+      endif
+
+      if (MAP1(6:6) .EQ. " ") then
+        write (*,*) "Error:  MAPLET name must be 6 characters"
+        stop
+      endif
 
 
       LMRKFILE='MAPFILES/'//MAP0//'.MAP'
