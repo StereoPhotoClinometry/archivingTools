@@ -81,7 +81,7 @@ C		Initalize variables
       do i=1,360
       do j=1,180
         coverage(i,j)=0
-        bestRes(i,j)=999999
+        bestRes(i,j)=4286578688
       enddo
       enddo
 
