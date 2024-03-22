@@ -81,7 +81,7 @@ C     Set output to zero
       do i=1,360
       do j=1,180
         coverage(i,j)=0
-        bestGSD=99999
+        bestGSD=4286578688
       enddo
       enddo
 
