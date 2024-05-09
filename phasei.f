@@ -24,7 +24,7 @@ C     Removed radius for clarity.  Changed version to a string
       IMPLICIT NONE
 
       INTEGER               NTMP
-      PARAMETER            (NTMP=4699)
+      PARAMETER            (NTMP=4001)
 
       DOUBLE PRECISION      SCALE
       DOUBLE PRECISION      V(3)
