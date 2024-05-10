@@ -110,7 +110,7 @@ shade from=preTopo.cub to=tmp.cub azimuth=270 zenith=60 PIXELRESOL=1.00
 isis2std from=tmp.cub to=tmp.png
 convert tmp.png -border 0x32 -gravity North -pointsize 25 -annotate +0+0 "Pre" preShade.png
 
-shade from=postTopo.cub to=tmp.cub azimuth=270 zenith=60 PIXELRESOL=.001
+shade from=postTopo.cub to=tmp.cub azimuth=270 zenith=60 PIXELRESOL=1.00
 isis2std from=tmp.cub to=tmp.png
 convert tmp.png -border 0x32 -gravity North -pointsize 25 -annotate +0+0 'Post' postShade.png
 
