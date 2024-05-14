@@ -80,6 +80,9 @@ C		Use all unless coverage_p.in
 C		Initalize variables
       do i=1,360
       do j=1,180
+C     Keep the value below as 999999, but remember to change 999999 to NULL
+C     when making the cube with ascii2isis.
+C     Use the flag "setnullrange=yes nullmin=999990.0 nullmax=1000000000.0".
         coverage(i,j)=0
         bestRes(i,j)=999999
       enddo
