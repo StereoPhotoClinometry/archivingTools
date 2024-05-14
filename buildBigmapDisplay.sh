@@ -125,7 +125,7 @@ echo "Delta<BR><img src=diff.png width=500> <BR><BR><HR>" >> $outFile
 
 ##############################################################
 echo "<HR>" >> $outFile
-echo "<table> <tr><td> " >> $outFile
+echo "<table> <tr style="vertical-align:top"><td> " >> $outFile
 ##############################################################
 # Go back to PRE and make those items
 ##############################################################
