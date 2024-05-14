@@ -20,11 +20,13 @@ C  Version 1.8 - 09 June 2022
 C		Now writes out radius, also updated radius to have double precision
 C  Version 1.9 - 15 June 2022 - Palmer
 C     Removed radius for clarity.  Changed version to a string
+C  Version 1.10 - 29 Aug 2023 - Palmer
+C		Set up dynamic memory to deal with dynamicLib issues for newer mac hardware
 
       IMPLICIT NONE
 
       INTEGER               NTMP
-      PARAMETER            (NTMP=4699)
+      PARAMETER            (NTMP=4001)
 
       DOUBLE PRECISION      SCALE
       DOUBLE PRECISION      V(3)
@@ -36,7 +38,7 @@ C     Removed radius for clarity.  Changed version to a string
       REAL*8                GAMMA, ETA, Z1, Z2, ILLUM, ALPHA, RPD
       REAL*8                slope(3)
 
-      REAL*4                TMPL(-NTMP:NTMP,-NTMP:NTMP,3)
+C      REAL*4                TMPL(-NTMP:NTMP,-NTMP:NTMP,3)
       LOGICAL               HUSE(-NTMP:NTMP,-NTMP:NTMP)
       LOGICAL               TUSE(-NTMP:NTMP,-NTMP:NTMP)
 
@@ -44,8 +46,8 @@ C     Removed radius for clarity.  Changed version to a string
 
 
 
-      REAL*4                HT0(-NTMP:NTMP,-NTMP:NTMP)
-      REAL*4                AL0(-NTMP:NTMP,-NTMP:NTMP)
+C      REAL*4                HT0(-NTMP:NTMP,-NTMP:NTMP)
+c      REAL*4                AL0(-NTMP:NTMP,-NTMP:NTMP)
       REAL*4                mVal, mX, mY
       REAL*4                minVal, minX, minY
 
@@ -83,20 +85,30 @@ c      real               version
       DOUBLE PRECISION      dist
       DOUBLE PRECISION      hold
 
-
-
       CHARACTER*6           MAP0
       CHARACTER*72          LMRKFILE
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = "1.9"
+C Set up Dynamic memory
+      integer :: inmax, error, stat
+      real*4, allocatable :: AL0(:,:)
+      real*4, allocatable :: HT0(:,:)
+      real*4, allocatable :: TMPL(:,:, :)
+
+      allocate (AL0 (-NTMP:NTMP,-NTMP:NTMP))
+      allocate (HT0 (-NTMP:NTMP,-NTMP:NTMP))
+      allocate (TMPL(-NTMP:NTMP,-NTMP:NTMP, 3))
 
 
+C Version of the code
+      version = "1.10"
       WRITE(*,*) 'Version:', version
 
+C What map name do you want
       WRITE(6,*) 'Input map name (only 6 char no MAPFILES and .MAP)'
       READ(5,FMT='(A6)') MAP0
+      write (*,*) "Map:  ", MAP0
 
       LMRKFILE='MAPFILES/'//MAP0//'.MAP'
       CALL READ_MAP(LMRKFILE,NTMP,QSZ,SCALE,V,UX,UY,UZ,HT0,AL0)
@@ -107,11 +119,12 @@ c      real               version
       write (*,*) "    Uz", UZ
       write (*,*) "    QSZ", QSZ
 
-
+C What image are we working with
       WRITE(6,*) 'Input image name'
       READ(5,FMT='(A12)') PICT
 
 
+C Read metadata from sumfile for all of the images
       PICTFILE='SUMFILES/'//PICT(1:12)//'.SUM'
       write (*,*) PICTFILE
       OPEN(UNIT=20,FILE=PICTFILE,STATUS='OLD')

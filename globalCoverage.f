@@ -164,7 +164,7 @@ C     Output the data
 C     Get the min value for padding the poles
 C     JRW is pretty sure the gsd value below isn't used because further down
 C     where bestGSD is set to be gsd, the line is commented out
-      gsd = 9999
+      gsd = 99999
       do j=1,180
         gsd = min (gsd, bestGSD(j,180))
       enddo
@@ -177,7 +177,7 @@ C     Output the data
           do i=1,360
 
 C           Have no data, so interpolate data to other points
-c            if (bestGSD(i,j) .gt. 9990) then
+c            if (bestGSD(i,j) .gt. 999000) then
 c              bestGSD(i,j) = gsd
 c            endif
             write (11, 97, advance="no") bestGSD(i,j)
