@@ -81,6 +81,9 @@ C     Set output to zero
       do i=1,360
       do j=1,180
         coverage(i,j)=0
+C     Keep the value below as 99999, but remember to change 99999 to NULL
+C     when making the cube with ascii2isis.
+C     Use the flag "setnullrange=yes nullmin=99990.0 nullmax=1000000000.0".
         bestGSD=99999
       enddo
       enddo
@@ -159,6 +162,8 @@ C     Output the data
       write(6,*) 'Global Coverage of maplets done.  Output: ', outfile
 
 C     Get the min value for padding the poles
+C     JRW is pretty sure the gsd value below isn't used because further down
+C     where bestGSD is set to be gsd, the line is commented out
       gsd = 9999
       do j=1,180
         gsd = min (gsd, bestGSD(j,180))
