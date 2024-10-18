@@ -31,6 +31,7 @@ echo "<H1>$bigmap</H1><BR><BR> " > $outFile
 # Create PRE 
 ##############################################################
 cd $prePath
+echo $bigmap | flatMapVec
 /bin/mv $bigmap.TXT $outPath/${bigmap}PreTopo.TXT
 
 val=`echo $bigmap | dumpMapHeaders | head -2 | tail -1 | cut -c 15-`
@@ -70,6 +71,7 @@ outPre1=`$altwg/PrintShapeModelStatistics $outPath/${bigmap}Post.obj `
 # Create POST 
 ##############################################################
 cd $postPath
+echo $bigmap | flatMapVec
 /bin/mv $bigmap.TXT $outPath/${bigmap}PostTopo.TXT
 
 echo $bigmap | showmap
