@@ -118,6 +118,7 @@ C Start with the bigmap, get its positional data
       read(5,fmt='(a6)') BIGMAP
       LMRKFILE='./MAPFILES/'//BIGMAP//'.MAP'
       CALL READ_MAP(LMRKFILE,mapSize,QSZ,S0,V,UX,UY,UZ,HT,AL)
+      write (*,*) "Max pixels:  ", (QSZ*2+1)**2
       CALL get_heights(mapSize,qsz,ux,uy,uz,v,s0, zuse,zht,zal) 
       DO I=-QSZ,QSZ
       DO J=-QSZ,QSZ
@@ -246,7 +247,6 @@ C          Translates the image's DN values into the bigmap's DN matrix
           mappedCnt = 0
           DO J=-QSZ,QSZ
           DO I=-QSZ,QSZ
-           mapDN(I,J) = 0
            CALL V2IMGPL(mapVect(1,I,J),imageV,PICNM,NPX,NLN,
      .                   MMFL,CTR,KMAT,D,
      .                   CX,CY,CZ, USE,IMGPL)
@@ -261,25 +261,24 @@ C           Checks to ensure image did fall within the boundaries of the maplet
 
 
 C         Remove values outside of T1 to T2 range from consideration
-C          OPEN(UNIT=110,FILE="testDN.txt",STATUS='UNKNOWN')
           t1Cnt=0
           DO I=-QSZ,QSZ
           DO J=-QSZ,QSZ
+            IF (.NOT. HUSE(I,J)) CONTINUE
+            IF (.NOT. TUSE(I,J)) CONTINUE
+            IF (mapDN(I,J) .NE. 0) then
             if ((mapDN(I,J) .LT. T1) .OR. (mapDN(I,J) .GT. T2)) THEN
                mapDN(I,J) = 0
                t1Cnt = t1Cnt + 1
             ENDIF
+            ENDIF
           ENDDO
-C          write (110,*) mapDN(I,-QSZ:QSZ)
           ENDDO
-C          CLOSE (UNIT=110)
 
 C         Loop over maplet's boundary
           DO J=-QSZ,QSZ
           DO I=-QSZ,QSZ
-          IF(HUSE(I,J).AND.TUSE(I,J)) THEN
-C           Test to see if the image DN should be considered
-            if (mapDN(I,J) .EQ. 0) continue
+          IF(HUSE(I,J).AND.TUSE(I,J) .AND. (mapDN(I,J).GT. 0)) THEN
 
 C           imageV is SCOBJ, W *should* be the vector from the s/c to surface
             CALL VADD(imageV,mapVect(1,I,J),W)
