@@ -175,7 +175,7 @@ C Loop through all SUMFILES to get geometry
         WRITE(6,FMT='(1X,A12,2A10,7A10)')  "PICNM", "Angle", 
      .     "Res?",
      .     "# LMK", "Min_Thres", "Max_Thres", "T_Pixel", 
-     .  "Val_Pixel"
+     .  "P_Res"
      . , "Updated", 
      .  "Ex_T1/T2"
         WRITE(30,FMT='(1A,A12,2A10,4A10)')  "#", "PICNM","Angle","Res?",
@@ -256,6 +256,10 @@ C           Checks to ensure image did fall within the boundaries of the maplet
               IF(Z1.NE.0) mapDN(I,J) = Z1
               mappedCnt = mappedCnt + 1
             ENDIF
+
+C           Mask out regions that have issues with the bigmap (albedo or slope)
+            IF (.NOT. HUSE(I,J)) mapDN(I,J) = 0
+            IF (.NOT. TUSE(I,J)) mapDN(I,J) = 0
           ENDDO
           ENDDO
 
@@ -264,9 +268,7 @@ C         Remove values outside of T1 to T2 range from consideration
           t1Cnt=0
           DO I=-QSZ,QSZ
           DO J=-QSZ,QSZ
-            IF (.NOT. HUSE(I,J)) CONTINUE
-            IF (.NOT. TUSE(I,J)) CONTINUE
-            IF (mapDN(I,J) .NE. 0) then
+            if (mapDN(I,J) .NE. 0) then
             if ((mapDN(I,J) .LT. T1) .OR. (mapDN(I,J) .GT. T2)) THEN
                mapDN(I,J) = 0
                t1Cnt = t1Cnt + 1
@@ -278,7 +280,7 @@ C         Remove values outside of T1 to T2 range from consideration
 C         Loop over maplet's boundary
           DO J=-QSZ,QSZ
           DO I=-QSZ,QSZ
-          IF(HUSE(I,J).AND.TUSE(I,J) .AND. (mapDN(I,J).GT. 0)) THEN
+          IF(mapDN(I,J).GT. 0) THEN
 
 C           imageV is SCOBJ, W *should* be the vector from the s/c to surface
             CALL VADD(imageV,mapVect(1,I,J),W)
@@ -302,6 +304,7 @@ C             Check for image resolution
               RES = Z4 * Z5
 C             Bob's calculation of resolution (Z5)
               Z5=Z4*Z5/(-VDOT(W,N(1,i,j)))
+              RES = Z5
               USE=USE.AND.(Z5.LE.RESLIM)
 
 
