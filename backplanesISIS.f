@@ -157,7 +157,8 @@ C         Recaculate the vector to each pixel
 C         Calculate the angles
 C             Run the fastes array element for the 1st index
 C         Albedo
-          write(11,240, advance="no") (AL0(I,J))
+C             Theep - I'm not sure John is correct itwh this, but let's see
+          write(11,240, advance="no") (AL0(J,I))
 
 C         SlopeNormal
           write(12,240, advance="no") (TMPL(I,J,1))
