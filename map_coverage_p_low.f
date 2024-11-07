@@ -13,21 +13,25 @@ C         txt of the coverage, actual vlaues
 C         txt of the best resolution detected
 C     Version 1.2 - 19 Oct 2021
 C         Fixed resolution check (z5 rather than RESLIM)
+C     Version 1.3 - 24 Oct 2024
+C         Added code to omit DN values less than T1
 
       IMPLICIT NONE
       
-      INTEGER               BTMP
-      PARAMETER            (BTMP=1025)
+      INTEGER               imageSize
+      PARAMETER            (imageSize=1300)
+      INTEGER               mapSize
+      PARAMETER            (mapSize=520)
       INTEGER               QSZ
 
       DOUBLE PRECISION      VDOT
       DOUBLE PRECISION      VNORM
       DOUBLE PRECISION      RPD
       DOUBLE PRECISION      V(3)
-      DOUBLE PRECISION      V0(3)
+      DOUBLE PRECISION      imageV(3)
       DOUBLE PRECISION      S0
-      DOUBLE PRECISION      VK(3,-BTMP:BTMP,-BTMP:BTMP)
-      DOUBLE PRECISION      N(3,-BTMP:BTMP,-BTMP:BTMP)
+      DOUBLE PRECISION      mapVect(3,-mapSize:mapSize,-mapSize:mapSize)
+      DOUBLE PRECISION      N(3,-mapSize:mapSize,-mapSize:mapSize)
       DOUBLE PRECISION      W(3)
       DOUBLE PRECISION      CX(3)
       DOUBLE PRECISION      CY(3)
@@ -44,14 +48,17 @@ C         Fixed resolution check (z5 rather than RESLIM)
       DOUBLE PRECISION      RESLIM
       DOUBLE PRECISION      RES
       DOUBLE PRECISION      Z1, Z2, Z3, Z4, Z5, Z6, Z7
+      DOUBLE PRECISION      BRT1
 
-      REAL*4                HT(-BTMP:BTMP,-BTMP:BTMP)
-      REAL*4                AL(-BTMP:BTMP,-BTMP:BTMP)
-      REAL*4                ZHT(-BTMP:BTMP,-BTMP:BTMP)
-      REAL*4                ZAL(-BTMP:BTMP,-BTMP:BTMP)
-      REAL*4                NH(-BTMP:BTMP,-BTMP:BTMP)
-      real*4                tmpl(-btmp:btmp,-btmp:btmp,3)
-      real*4                bestRes (-BTMP:BTMP, -BTMP:BTMP)
+
+
+      REAL*4                HT(-mapSize:mapSize,-mapSize:mapSize)
+      REAL*4                AL(-mapSize:mapSize,-mapSize:mapSize)
+      REAL*4                ZHT(-mapSize:mapSize,-mapSize:mapSize)
+      REAL*4                ZAL(-mapSize:mapSize,-mapSize:mapSize)
+      REAL*4                NH(-mapSize:mapSize,-mapSize:mapSize)
+      real*4                tmpl(-mapSize:mapSize,-mapSize:mapSize,3)
+      real*4                bestRes (-mapSize:mapSize, -mapSize:mapSize)
 
       INTEGER               NPX, NLN
       INTEGER               I
@@ -75,11 +82,33 @@ C         Fixed resolution check (z5 rather than RESLIM)
       real version
 
       LOGICAL               USE
-      LOGICAL               HUSE(-BTMP:BTMP,-BTMP:BTMP)
-      LOGICAL               ZUSE(-BTMP:BTMP,-BTMP:BTMP)
-      logical               tuse(-btmp:btmp,-btmp:btmp)
+      LOGICAL               HUSE(-mapSize:mapSize,-mapSize:mapSize)
+      LOGICAL               ZUSE(-mapSize:mapSize,-mapSize:mapSize)
+      logical               tuse(-mapSize:mapSize,-mapSize:mapSize)
 
-      version = 1.2
+C     Bonus parameters needed to run EXTRACT_DATA_PIC to identify T1
+      DOUBLE PRECISION      CP(3)
+      DOUBLE PRECISION      SP(3)
+      DOUBLE PRECISION      ETOL
+      DOUBLE PRECISION      X
+      DOUBLE PRECISION      DPIC_DLOC(2,3)
+      DOUBLE PRECISION      DIDH
+      DOUBLE PRECISION      DJDH
+      DOUBLE PRECISION      IPL(2)
+      INTEGER               Z0(2), KK
+      INTEGER         imageDN(-imageSize:imageSize,-imageSize:imageSize)
+      REAL*4          mapDN(-mapSize:mapSize,-mapSize:mapSize)
+      logical         EUSE
+      REAL*4          mapHeight(-mapSize:mapSize,-mapSize:mapSize)
+      integer         t1Cnt
+      integer         mappedCnt
+       
+
+
+
+
+
+      version = 1.3
 
 C Start with the bigmap, get its positional data
       write (*,*) "Version: ", version
@@ -88,8 +117,9 @@ C Start with the bigmap, get its positional data
       WRITE(6,*) 'Input MAPNAME'
       read(5,fmt='(a6)') BIGMAP
       LMRKFILE='./MAPFILES/'//BIGMAP//'.MAP'
-      CALL READ_MAP(LMRKFILE,BTMP,QSZ,S0,V,UX,UY,UZ,HT,AL)
-      CALL get_heights(btmp,qsz,ux,uy,uz,v,s0, zuse,zht,zal) 
+      CALL READ_MAP(LMRKFILE,mapSize,QSZ,S0,V,UX,UY,UZ,HT,AL)
+      write (*,*) "Max pixels:  ", (QSZ*2+1)**2
+      CALL get_heights(mapSize,qsz,ux,uy,uz,v,s0, zuse,zht,zal) 
       DO I=-QSZ,QSZ
       DO J=-QSZ,QSZ
         HUSE(I,J)=.TRUE.
@@ -108,15 +138,15 @@ C       Set best resolution value to high value to avoid
         bestRes (i,J) = 9999
       ENDDO
       ENDDO
-      call hgt2slp(btmp,qsz,HUSE,HT, tuse,tmpl)
+      call hgt2slp(mapSize,qsz,HUSE,HT, tuse,tmpl)
       DO J=-QSZ,QSZ
       DO I=-QSZ,QSZ
 
-C       VK is the vector to the 3D position of each surface element
+C       mapVect is the vector to the 3D position of each surface element
       IF(HUSE(I,J)) THEN
-        VK(1,I,J)=V(1)+S0*(J*UX(1)+I*UY(1)+HT(I,J)*UZ(1))
-        VK(2,I,J)=V(2)+S0*(J*UX(2)+I*UY(2)+HT(I,J)*UZ(2))
-        VK(3,I,J)=V(3)+S0*(J*UX(3)+I*UY(3)+HT(I,J)*UZ(3))
+        mapVect(1,I,J)=V(1)+S0*(J*UX(1)+I*UY(1)+HT(I,J)*UZ(1))
+        mapVect(2,I,J)=V(2)+S0*(J*UX(2)+I*UY(2)+HT(I,J)*UZ(2))
+        mapVect(3,I,J)=V(3)+S0*(J*UX(3)+I*UY(3)+HT(I,J)*UZ(3))
 
 C       N is a vector for the normal reflecting the local slope
         if(tuse(i,j)) then
@@ -135,17 +165,24 @@ C Get list of images to check -- coverage_p.in allows a subset (if you also say 
       INFILE='coverage_p.in'
       INQUIRE(FILE=INFILE, EXIST=USE)
       IF((.NOT.USE).OR.(ANS.EQ.'y')) INFILE='PICTLIST.TXT'
-      open(unit=20, file=INFILE, status='old')
+      open(unit=120, file=INFILE, status='old')
       open(unit=30, file='coverage_p.out', status='unknown')
+
+      write (*,*) "In file:  ", infile
 
 
 C Loop through all SUMFILES to get geometry
-        WRITE(6,FMT='(1X,A12,2A10,4A10)')  "PICNM", "Angle", "Res?",
-     .     "# LMK", "Min Thres", "Max Thres", "Pixel", "Used"
+        WRITE(6,FMT='(1X,A12,2A10,7A10)')  "PICNM", "Angle", 
+     .     "Res?",
+     .     "# LMK", "Min_Thres", "Max_Thres", "T_Pixel", 
+     .  "P_Res"
+     . , "Updated", 
+     .  "Ex_T1/T2"
         WRITE(30,FMT='(1A,A12,2A10,4A10)')  "#", "PICNM","Angle","Res?",
      .     "# LMK", "Min Thres", "Max Thres", "Pixel", "Used"
 10      continue
-        read(20,fmt='(a13)') xname
+
+        read(120,fmt='(a13)') xname
         if(xname(1:1).eq.'!') go to 10
         if(xname(1:1).eq.'#') go to 10
         IF(xname(1:3).ne.'END') then
@@ -157,7 +194,7 @@ C Loop through all SUMFILES to get geometry
             READ(10,*)
             READ(10,*)  NPX, NLN, T1, T2
             READ(10,*)  MMFL, CTR(1), CTR(2)
-            READ(10,*) (V0(I), I=1,3) 
+            READ(10,*) (imageV(I), I=1,3) 
             READ(10,*) (CX(I), I=1,3)
             READ(10,*) (CY(I), I=1,3)
             READ(10,*) (CZ(I), I=1,3)
@@ -174,6 +211,16 @@ C Loop through all SUMFILES to get geometry
               D(4)=0.D0
             ENDIF
           CLOSE(UNIT=10)
+
+
+C         Clear out old arrays
+          DO J=-QSZ,QSZ
+          DO I=-QSZ,QSZ
+            mapDN(I,J) = 0
+          ENDDO
+          ENDDO
+
+C----------------------- Confidence 25%
 C         Z1 and Z2 - are likely the physical size of the detector
           Z1=NPX/(2*KMAT(1,1)*MMFL)
           Z2=NLN/(2*KMAT(2,2)*MMFL)
@@ -185,13 +232,58 @@ C         Z3 is the cos of the diagonal
           Z7=0
           K=0
           usedK=0
+          KK=1+INT(Z1/128)
+
+C -----------------------
+C         Load the image's DN value into the image's DN array 
+
+          Z0(1)=NINT(CTR(1))
+          Z0(2)=NINT(CTR(2))
+
+          CALL PICINPT(PICNM,Z0,KK,imageDN,imageSize)
+C -----------------------
+C          Translates the image's DN values into the bigmap's DN matrix
+
+          mappedCnt = 0
+          DO J=-QSZ,QSZ
+          DO I=-QSZ,QSZ
+           CALL V2IMGPL(mapVect(1,I,J),imageV,PICNM,NPX,NLN,
+     .                   MMFL,CTR,KMAT,D,
+     .                   CX,CY,CZ, USE,IMGPL)
+C           Checks to ensure image did fall within the boundaries of the maplet
+            IF(USE) THEN
+              Z1 = BRT1(IMGPL, Z0, KK, imageDN, imageSize)
+              IF(Z1.NE.0) mapDN(I,J) = Z1
+              mappedCnt = mappedCnt + 1
+            ENDIF
+
+C           Mask out regions that have issues with the bigmap (albedo or slope)
+            IF (.NOT. HUSE(I,J)) mapDN(I,J) = 0
+            IF (.NOT. TUSE(I,J)) mapDN(I,J) = 0
+          ENDDO
+          ENDDO
+
+
+C         Remove values outside of T1 to T2 range from consideration
+          t1Cnt=0
+          DO I=-QSZ,QSZ
+          DO J=-QSZ,QSZ
+            if (mapDN(I,J) .NE. 0) then
+            if ((mapDN(I,J) .LT. T1) .OR. (mapDN(I,J) .GT. T2)) THEN
+               mapDN(I,J) = 0
+               t1Cnt = t1Cnt + 1
+            ENDIF
+            ENDIF
+          ENDDO
+          ENDDO
 
 C         Loop over maplet's boundary
           DO J=-QSZ,QSZ
           DO I=-QSZ,QSZ
-          IF(HUSE(I,J).AND.TUSE(I,J)) THEN
-C           V0 is SCOBJ, W *should* be the vector from the s/c to surface
-            CALL VADD(V0,VK(1,I,J),W)
+          IF(mapDN(I,J).GT. 0) THEN
+
+C           imageV is SCOBJ, W *should* be the vector from the s/c to surface
+            CALL VADD(imageV,mapVect(1,I,J),W)
 
 C           Z5 is the scaler, distance from the S/C
             Z5=VNORM(W)
@@ -204,13 +296,15 @@ C           Testing to see if illuminated
             IF(VDOT(SZ,N(1,i,j)).GT.0) THEN
 
 C           Use V2IMGPL to see if the pixel is valid for the image
-              CALL V2IMGPL(VK(1,I,J),V0,PICNM,NPX,NLN,MMFL,CTR,
+              CALL V2IMGPL(mapVect(1,I,J),imageV,PICNM,NPX,NLN,MMFL,CTR,
      .                     KMAT,D,CX,CY,CZ, USE,IMGPL)
+
 
 C             Check for image resolution
               RES = Z4 * Z5
 C             Bob's calculation of resolution (Z5)
               Z5=Z4*Z5/(-VDOT(W,N(1,i,j)))
+              RES = Z5
               USE=USE.AND.(Z5.LE.RESLIM)
 
 
@@ -243,15 +337,16 @@ C           Average the emission angle and image resolution that was used
             Z6=Z6/K
             Z7=Z7/K
             I=LMCOUNT(PICNM,0)
-            WRITE(6,FMT='(1X,A12,2F10.3,5I10)')  PICNM, 
-     .        ACOS(Z6)/RPD(), Z7, I, T1, T2, K, usedK
+            WRITE(6,FMT='(1X,A12,2F10.3,8I10)')  PICNM, 
+     .        ACOS(Z6)/RPD(), Z7, I, T1, T2, mappedCnt, K, usedK, 
+     .        t1Cnt
             WRITE(30,FMT='(1X,A12,2F10.3,5I10)') PICNM, 
      .        ACOS(Z6)/RPD(), Z7, I, T1, T2, K, usedK
            ENDIF
           go to 10
         ENDIF
       close(unit=30)
-      close(unit=20)
+      close(unit=120)
 
 C Make a binary 2D array before it is converted to a pgm
       open(unit=55,file='coverage.gray', access='direct', 
