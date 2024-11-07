@@ -16,6 +16,11 @@ C		Output user defined elevation relative to datum instead of radius
 C		elevation is double precision
 C		version is now a string
 C		NTMP increased from 2001 to 3001
+C  Version 1.6 - 7 NOv 2024
+C     While the radius is rotated correctly, the slope and albedo
+C        had a trasposition.  HT0 indicates a J, then I, which might
+C        not be what we really want.  However, for expedience, I just
+C        transposed all of the array access to be J then I to fix the output
 
       IMPLICIT NONE
 
@@ -152,7 +157,8 @@ C         Recaculate the vector to each pixel
           localV(2)=V(2)+SCALE*(J*UY(2)+I*UX(2)+Z0*UZ(2))
           localV(3)=V(3)+SCALE*(J*UY(3)+I*UX(3)+Z0*UZ(3))
 
-          GAMMA=SQRT(1+TMPL(I,J,1)**2+TMPL(I,J,2)**2)
+C          Not used
+C          GAMMA=SQRT(1+TMPL(I,J,1)**2+TMPL(I,J,2)**2)
 
 C         Calculate the angles
 C             Run the fastes array element for the 1st index
@@ -161,11 +167,11 @@ C             Theep - I'm not sure John is correct itwh this, but let's see
           write(11,240, advance="no") (AL0(J,I))
 
 C         SlopeNormal
-          write(12,240, advance="no") (TMPL(I,J,1))
+          write(12,240, advance="no") (TMPL(J,I,1))
 
 C         Slope
-          write(13,240, advance="no") (TMPL(I,J,1))
-          write(14,240, advance="no") (TMPL(I,J,2))
+          write(13,240, advance="no") (TMPL(J,I,1))
+          write(14,240, advance="no") (TMPL(J,I,2))
 
 C			Lat and lon
           dist = sqrt (localV(1)**2 + localV(2)**2 + localV(3)**2)
