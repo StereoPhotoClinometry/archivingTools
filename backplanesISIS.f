@@ -16,7 +16,7 @@ C		Output user defined elevation relative to datum instead of radius
 C		elevation is double precision
 C		version is now a string
 C		NTMP increased from 2001 to 3001
-C  Version 1.6 - 7 NOv 2024
+C  Version 1.6 - 7 Nov 2024
 C     While the radius is rotated correctly, the slope and albedo
 C        had a trasposition.  HT0 indicates a J, then I, which might
 C        not be what we really want.  However, for expedience, I just
@@ -87,7 +87,7 @@ C      real               version
       CHARACTER*72          PICT
       CHARACTER*72          PICTFILE
     
-      version = "1.5"
+      version = "1.6"
 
 
       WRITE(*,*) 'Version:', version
