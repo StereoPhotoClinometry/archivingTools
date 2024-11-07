@@ -21,7 +21,7 @@ C         Added code to omit DN values less than T1
       INTEGER               imageSize
       PARAMETER            (imageSize=1300)
       INTEGER               mapSize
-      PARAMETER            (mapSize=520)
+      PARAMETER            (mapSize=2500)
       INTEGER               QSZ
 
       DOUBLE PRECISION      VDOT
