@@ -16,12 +16,15 @@ C         Fixed resolution check (z5 rather than RESLIM)
 C     Version 1.3 - 24 Oct 2024
 C         Added code to omit DN values less than T1
 
+      use mod_picInpt
+      use mod_brt1
+
       IMPLICIT NONE
       
       INTEGER               imageSize
-      PARAMETER            (imageSize=1300)
+      PARAMETER            (imageSize=26200)
       INTEGER               mapSize
-      PARAMETER            (mapSize=2500)
+      PARAMETER            (mapSize=2250)
       INTEGER               QSZ
 
       DOUBLE PRECISION      VDOT
@@ -48,7 +51,6 @@ C         Added code to omit DN values less than T1
       DOUBLE PRECISION      RESLIM
       DOUBLE PRECISION      RES
       DOUBLE PRECISION      Z1, Z2, Z3, Z4, Z5, Z6, Z7
-      DOUBLE PRECISION      BRT1
 
 
 
@@ -96,7 +98,8 @@ C     Bonus parameters needed to run EXTRACT_DATA_PIC to identify T1
       DOUBLE PRECISION      DJDH
       DOUBLE PRECISION      IPL(2)
       INTEGER               Z0(2), KK
-      INTEGER         imageDN(-imageSize:imageSize,-imageSize:imageSize)
+      INTEGER,allocatable::         imageDN(:,:)
+c     INTEGER         imageDN(-imageSize:imageSize,-imageSize:imageSize)
       REAL*4          mapDN(-mapSize:mapSize,-mapSize:mapSize)
       logical         EUSE
       REAL*4          mapHeight(-mapSize:mapSize,-mapSize:mapSize)
@@ -109,6 +112,7 @@ C     Bonus parameters needed to run EXTRACT_DATA_PIC to identify T1
 
 
       version = 1.3
+      allocate(imageDN(-imageSize:imageSize,-imageSize:imageSize))
 
 C Start with the bigmap, get its positional data
       write (*,*) "Version: ", version
@@ -365,6 +369,9 @@ c            z1=15*nh(i,j)
             write (56, 98, advance="no") nh(i,j)
             write (57, 99, advance="no") bestRes(i,j)
           enddo
+          write (*,*) j
+          write (*,*) qsz
+          write (*,*) j+qsz+1
           write(55,rec=j+qsz+1) tline(1:2*qsz+1)
           write (56, 99) 
           write (57, 99) 
