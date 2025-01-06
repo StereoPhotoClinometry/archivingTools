@@ -3,7 +3,7 @@
 # Reformats ICQ to be fixed width table
 # Be sure to change D to E before running the script
 # You can use "sed '2,$ s/D/E/g' SHAPE.TXT > tmp" to do this
-
+# 06 Jan 2025: Updated so there's no white spaces before the Q size
 
 NR==1 {
 	printf("%-80s\n", $1)
