@@ -3,7 +3,8 @@
 # Takes multiple outputs from map_coverage_p_low and determines the highest
 # image resolution and the second highest image resolution. Had AI generate it.
 # I checked the results using ISIS 
-
+# 13 Feb 2026 : Now requires 4 arguments (2 out and 2 in), sys.argv counts the
+# 		script name.
 
 import sys, math
 from itertools import zip_longest
@@ -12,7 +13,7 @@ def usage():
     print(f"Usage: {sys.argv[0]} out_min.txt out_second_min.txt file1.txt [file2.txt ...]")
     sys.exit(1)
 
-if len(sys.argv) < 4:
+if len(sys.argv) < 5:
     usage()
 
 out_min, out_second, *inputs = sys.argv[1:]
