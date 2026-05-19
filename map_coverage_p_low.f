@@ -17,7 +17,7 @@ C         Fixed resolution check (z5 rather than RESLIM)
       IMPLICIT NONE
       
       INTEGER               BTMP
-      PARAMETER            (BTMP=1025)
+      PARAMETER            (BTMP=2500)
       INTEGER               QSZ
 
       DOUBLE PRECISION      VDOT
@@ -26,8 +26,12 @@ C         Fixed resolution check (z5 rather than RESLIM)
       DOUBLE PRECISION      V(3)
       DOUBLE PRECISION      V0(3)
       DOUBLE PRECISION      S0
-      DOUBLE PRECISION      VK(3,-BTMP:BTMP,-BTMP:BTMP)
-      DOUBLE PRECISION      N(3,-BTMP:BTMP,-BTMP:BTMP)
+
+C      DOUBLE PRECISION      VK(3,-BTMP:BTMP,-BTMP:BTMP)
+C      DOUBLE PRECISION      N(3,-BTMP:BTMP,-BTMP:BTMP)
+      DOUBLE PRECISION, allocatable ::      N(:,:,:)
+      DOUBLE PRECISION, allocatable ::      VK(:,:,:)
+
       DOUBLE PRECISION      W(3)
       DOUBLE PRECISION      CX(3)
       DOUBLE PRECISION      CY(3)
@@ -47,11 +51,12 @@ C         Fixed resolution check (z5 rather than RESLIM)
 
       REAL*4                HT(-BTMP:BTMP,-BTMP:BTMP)
       REAL*4                AL(-BTMP:BTMP,-BTMP:BTMP)
-      REAL*4                ZHT(-BTMP:BTMP,-BTMP:BTMP)
-      REAL*4                ZAL(-BTMP:BTMP,-BTMP:BTMP)
-      REAL*4                NH(-BTMP:BTMP,-BTMP:BTMP)
-      real*4                tmpl(-btmp:btmp,-btmp:btmp,3)
-      real*4                bestRes (-BTMP:BTMP, -BTMP:BTMP)
+
+      REAL*4, allocatable ::                ZHT(:,:)
+      REAL*4, allocatable ::                ZAL(:,:)
+      REAL*4, allocatable ::                NH(:,:)
+      real*4, allocatable ::                tmpl(:,:,:)
+      real*4, allocatable ::                bestRes (:, :)
 
       INTEGER               NPX, NLN
       INTEGER               I
@@ -71,15 +76,30 @@ C         Fixed resolution check (z5 rather than RESLIM)
       CHARACTER*72          INFILE
       CHARACTER*72          OUTFILE
       CHARACTER*80          LINE
-      character*(2051)      tline
+      character*(5051)      tline
       real version
 
       LOGICAL               USE
-      LOGICAL               HUSE(-BTMP:BTMP,-BTMP:BTMP)
-      LOGICAL               ZUSE(-BTMP:BTMP,-BTMP:BTMP)
-      logical               tuse(-btmp:btmp,-btmp:btmp)
+      LOGICAL, allocatable ::            HUSE(:,:)
+      LOGICAL, allocatable ::            ZUSE(:,:)
+      logical, allocatable ::            tuse(:,:)
 
       version = 1.2
+
+C Allocate dynamic memory from static
+      allocate (VK (3, -BTMP:BTMP, -BTMP:BTMP))
+      allocate (N (3, -BTMP:BTMP, -BTMP:BTMP))
+      allocate (HUSE(-BTMP:BTMP,-BTMP:BTMP))
+      allocate (ZUSE(-BTMP:BTMP,-BTMP:BTMP) )
+      allocate (tuse(-btmp:btmp,-btmp:btmp) )
+
+      allocate (ZHT(-BTMP:BTMP,-BTMP:BTMP)   )
+      allocate (ZAL(-BTMP:BTMP,-BTMP:BTMP)   )
+      allocate (NH(-BTMP:BTMP,-BTMP:BTMP)   )
+      allocate (tmpl(-btmp:btmp,-btmp:btmp,3)   )
+      allocate (bestRes (-BTMP:BTMP, -BTMP:BTMP)   )
+
+
 
 C Start with the bigmap, get its positional data
       write (*,*) "Version: ", version
@@ -90,6 +110,7 @@ C Start with the bigmap, get its positional data
       LMRKFILE='./MAPFILES/'//BIGMAP//'.MAP'
       CALL READ_MAP(LMRKFILE,BTMP,QSZ,S0,V,UX,UY,UZ,HT,AL)
       CALL get_heights(btmp,qsz,ux,uy,uz,v,s0, zuse,zht,zal) 
+      write (*,*) "QSize:  ", qsz
       DO I=-QSZ,QSZ
       DO J=-QSZ,QSZ
         HUSE(I,J)=.TRUE.
@@ -256,9 +277,11 @@ C           Average the emission angle and image resolution that was used
 C Make a binary 2D array before it is converted to a pgm
       open(unit=55,file='coverage.gray', access='direct', 
      .     recl=2*qsz+1, status='unknown')
+
       outfile=BIGMAP//'-cov.txt'
       open(unit=56,file=outfile)
       outfile=BIGMAP//'-res.txt'
+
       open(unit=57,file=outfile)
         do j=-qsz,qsz
           do i=-qsz,qsz
@@ -270,7 +293,9 @@ c            z1=15*nh(i,j)
             write (56, 98, advance="no") nh(i,j)
             write (57, 99, advance="no") bestRes(i,j)
           enddo
+C         Can't write very long lines, so I am breaking them up into two writes
           write(55,rec=j+qsz+1) tline(1:2*qsz+1)
+
           write (56, 99) 
           write (57, 99) 
         enddo
