@@ -15,6 +15,9 @@ C     Version 1.2 - 19 Oct 2021
 C         Fixed resolution check (z5 rather than RESLIM)
 C     Version 1.3 - 24 Oct 2024
 C         Added code to omit DN values less than T1
+C     Version 1.4 - 20 May 2026
+C         Dynamic memory
+
 
       IMPLICIT NONE
       
@@ -30,8 +33,10 @@ C         Added code to omit DN values less than T1
       DOUBLE PRECISION      V(3)
       DOUBLE PRECISION      imageV(3)
       DOUBLE PRECISION      S0
-      DOUBLE PRECISION      mapVect(3,-mapSize:mapSize,-mapSize:mapSize)
-      DOUBLE PRECISION      N(3,-mapSize:mapSize,-mapSize:mapSize)
+C      DOUBLE PRECISION      mapVect(3,-mapSize:mapSize,-mapSize:mapSize)
+C      DOUBLE PRECISION      N(3,-mapSize:mapSize,-mapSize:mapSize)
+      DOUBLE PRECISION, allocatable::      mapVect(:,:,:)
+      DOUBLE PRECISION, allocatable::      N(:,:,:)
       DOUBLE PRECISION      W(3)
       DOUBLE PRECISION      CX(3)
       DOUBLE PRECISION      CY(3)
@@ -52,13 +57,20 @@ C         Added code to omit DN values less than T1
 
 
 
-      REAL*4                HT(-mapSize:mapSize,-mapSize:mapSize)
-      REAL*4                AL(-mapSize:mapSize,-mapSize:mapSize)
-      REAL*4                ZHT(-mapSize:mapSize,-mapSize:mapSize)
-      REAL*4                ZAL(-mapSize:mapSize,-mapSize:mapSize)
-      REAL*4                NH(-mapSize:mapSize,-mapSize:mapSize)
-      real*4                tmpl(-mapSize:mapSize,-mapSize:mapSize,3)
-      real*4                bestRes (-mapSize:mapSize, -mapSize:mapSize)
+C      REAL*4                HT(-mapSize:mapSize,-mapSize:mapSize)
+C      REAL*4                AL (-mapSize:mapSize,-mapSize:mapSize)
+C      REAL*4                ZHT (-mapSize:mapSize,-mapSize:mapSize)
+C      REAL*4                ZAL (-mapSize:mapSize,-mapSize:mapSize)
+C      REAL*4                NH (-mapSize:mapSize,-mapSize:mapSize)
+C      real*4                tmpl (-mapSize:mapSize,-mapSize:mapSize,3)
+C      real*4                bestRes (-mapSize:mapSize, -mapSize:mapSize)
+      REAL*4, allocatable:: HT(:,:)
+      REAL*4, allocatable:: AL (:,:)
+      REAL*4, allocatable:: ZHT (:,:)
+      REAL*4, allocatable:: ZAL (:,:)
+      REAL*4, allocatable:: NH (:,:)
+      real*4, allocatable:: tmpl (:,:,:)
+      real*4, allocatable:: bestRes (:,:)
 
       INTEGER               NPX, NLN
       INTEGER               I
@@ -82,9 +94,12 @@ C         Added code to omit DN values less than T1
       real version
 
       LOGICAL               USE
-      LOGICAL               HUSE(-mapSize:mapSize,-mapSize:mapSize)
-      LOGICAL               ZUSE(-mapSize:mapSize,-mapSize:mapSize)
-      logical               tuse(-mapSize:mapSize,-mapSize:mapSize)
+C      LOGICAL               HUSE(-mapSize:mapSize,-mapSize:mapSize)
+C      LOGICAL               ZUSE(-mapSize:mapSize,-mapSize:mapSize)
+C      logical               tuse(-mapSize:mapSize,-mapSize:mapSize)
+      LOGICAL, allocatable::               HUSE(:,:)
+      LOGICAL, allocatable::              ZUSE(:,:)
+      logical, allocatable::               tuse(:,:)
 
 C     Bonus parameters needed to run EXTRACT_DATA_PIC to identify T1
       DOUBLE PRECISION      CP(3)
@@ -96,19 +111,42 @@ C     Bonus parameters needed to run EXTRACT_DATA_PIC to identify T1
       DOUBLE PRECISION      DJDH
       DOUBLE PRECISION      IPL(2)
       INTEGER               Z0(2), KK
-      INTEGER         imageDN(-imageSize:imageSize,-imageSize:imageSize)
-      REAL*4          mapDN(-mapSize:mapSize,-mapSize:mapSize)
+
+C      INTEGER         imageDN(-imageSize:imageSize,-imageSize:imageSize)
+C      REAL*4          mapDN(-mapSize:mapSize,-mapSize:mapSize)
+C      REAL*4          mapHeight(-mapSize:mapSize,-mapSize:mapSize)
+      INTEGER, allocatable::          imageDN(:,:)
+      REAL*4 , allocatable::          mapDN(:,:)
+      REAL*4 , allocatable::          mapHeight(:,:)
       logical         EUSE
-      REAL*4          mapHeight(-mapSize:mapSize,-mapSize:mapSize)
       integer         t1Cnt
       integer         mappedCnt
        
 
+C Allocate dynamic memory from static
+      allocate (mapVect (3, -mapsize:mapsize, -mapsize:mapsize) )
+      allocate (N    (3, -mapsize:mapsize, -mapsize:mapsize))
+
+      allocate (HT (-mapsize:mapsize,-mapsize:mapsize)   )
+      allocate (AL (-mapsize:mapsize,-mapsize:mapsize)   )
+      allocate (ZHT (-mapsize:mapsize,-mapsize:mapsize)   )
+      allocate (ZAL (-mapsize:mapsize,-mapsize:mapsize)   )
+      allocate (NH  (-mapsize:mapsize,-mapsize:mapsize)   )
+      allocate (tmpl(-mapsize:mapsize,-mapsize:mapsize,3)   )
+      allocate (bestRes (-mapsize:mapsize, -mapsize:mapsize)   )
+
+      allocate (HUSE (-mapsize:mapsize,-mapsize:mapsize))
+      allocate (ZUSE (-mapsize:mapsize,-mapsize:mapsize) )
+      allocate (tuse (-mapsize:mapsize,-mapsize:mapsize) )
+
+      allocate (imageDN (-imageSize:imageSize,-imageSize:imageSize) )
+      allocate (mapDN (-mapSize:mapSize,-mapSize:mapSize) )
+      allocate (mapHeight (-mapSize:mapSize,-mapSize:mapSize) )
 
 
 
 
-      version = 1.3
+      version = 1.4
 
 C Start with the bigmap, get its positional data
       write (*,*) "Version: ", version
@@ -117,7 +155,9 @@ C Start with the bigmap, get its positional data
       WRITE(6,*) 'Input MAPNAME'
       read(5,fmt='(a6)') BIGMAP
       LMRKFILE='./MAPFILES/'//BIGMAP//'.MAP'
+
       CALL READ_MAP(LMRKFILE,mapSize,QSZ,S0,V,UX,UY,UZ,HT,AL)
+
       write (*,*) "Max pixels:  ", (QSZ*2+1)**2
       CALL get_heights(mapSize,qsz,ux,uy,uz,v,s0, zuse,zht,zal) 
       DO I=-QSZ,QSZ
@@ -142,6 +182,7 @@ C       Set best resolution value to high value to avoid
       DO J=-QSZ,QSZ
       DO I=-QSZ,QSZ
 
+     
 C       mapVect is the vector to the 3D position of each surface element
       IF(HUSE(I,J)) THEN
         mapVect(1,I,J)=V(1)+S0*(J*UX(1)+I*UY(1)+HT(I,J)*UZ(1))
