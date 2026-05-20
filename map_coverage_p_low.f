@@ -90,7 +90,7 @@ C      real*4                bestRes (-mapSize:mapSize, -mapSize:mapSize)
       CHARACTER*72          INFILE
       CHARACTER*72          OUTFILE
       CHARACTER*80          LINE
-      character*(mapSize)      tline
+      character*(mapSize*2+1)      tLine
       real version
 
       LOGICAL               USE
@@ -402,11 +402,11 @@ C           Take the number of images and multipy it by 1 (or 15 originally)
             z1=1*nh(i,j)
 c            z1=15*nh(i,j)
             z1=min(255.,z1)
-            tline(i+qsz+1:i+qsz+1)=char(nint(z1))
+            tLine(i+qsz+1:i+qsz+1)=char(nint(z1))
             write (56, 98, advance="no") nh(i,j)
             write (57, 99, advance="no") bestRes(i,j)
           enddo
-          write(55,rec=j+qsz+1) tline(1:2*qsz+1)
+          write(55,rec=j+qsz+1) tLine(1:2*qsz+1)
           write (56, 99) 
           write (57, 99) 
         enddo
