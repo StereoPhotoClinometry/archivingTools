@@ -13,6 +13,12 @@ C         txt of the coverage, actual vlaues
 C         txt of the best resolution detected
 C     Version 1.2 - 19 Oct 2021
 C         Fixed resolution check (z5 rather than RESLIM)
+C      Version 1.3 - Some other time...
+C         A different version of unknown provinence is out there somewhere
+C      Version 1.4 - 19 May 2026
+C         This version was copied from v1.2 and updated to work with newer
+C         versions of MacOS like Sequoia. Arrays were also made large enough
+C         to work with line scan images (i.e. XFiles)
 
       IMPLICIT NONE
       
@@ -84,7 +90,7 @@ C      DOUBLE PRECISION      N(3,-BTMP:BTMP,-BTMP:BTMP)
       LOGICAL, allocatable ::            ZUSE(:,:)
       logical, allocatable ::            tuse(:,:)
 
-      version = 1.2
+      version = 1.4
 
 C Allocate dynamic memory from static
       allocate (VK (3, -BTMP:BTMP, -BTMP:BTMP))
