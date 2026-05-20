@@ -90,7 +90,7 @@ C      real*4                bestRes (-mapSize:mapSize, -mapSize:mapSize)
       CHARACTER*72          INFILE
       CHARACTER*72          OUTFILE
       CHARACTER*80          LINE
-      character*(2051)      tline
+      character*(mapSize)      tline
       real version
 
       LOGICAL               USE
