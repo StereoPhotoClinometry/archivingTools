@@ -43,37 +43,49 @@ c   ................................................
       INTEGER               NPX
       INTEGER               NLN
       INTEGER               SLEN
+      INTEGER               IFF
           
-      CHARACTER*12          PICNM
+      CHARACTER*12          PICNM, saveName
       CHARACTER*72          PICTFILE
       CHARACTER*80          LINE
           
       LOGICAL               USE
       LOGICAL               LS
 
-      USE=.FALSE.
-      LS=.FALSE.
-      I=SLEN(PICNM)
-      PICTFILE='SUMFILES/'//PICNM(1:I)//'.SUM'
-      OPEN(UNIT=32,FILE=PICTFILE,STATUS='OLD')
-        READ(32,FMT='(A80)') LINE
-        IF(LINE(14:14).EQ.'L') THEN
-          LS=.TRUE.
-10        CONTINUE
+      SAVE                  IFF, saveName
+      SAVE   U0, R0, POL_AXIS, POL, TRJ_AXIS, TRJ, KMAX, CAX
+
+
+
+
+      if (PICNM .NE. saveName) then
+        saveName = PICNM
+        LS=.FALSE.
+        I=SLEN(PICNM)
+        PICTFILE='SUMFILES/'//PICNM(1:I)//'.SUM'
+        OPEN(UNIT=32,FILE=PICTFILE,STATUS='OLD')
           READ(32,FMT='(A80)') LINE
-          IF(LINE(1:14).NE.'LINE SCAN DATA') GO TO 10
-          READ(32,*) (U0(I), I=1,3) 
-          READ(32,*) (R0(I), I=1,3)
-          READ(32,*) (POL_AXIS(I), I=1,3)
-          READ(32,*) POL
-          READ(32,*) (TRJ_AXIS(I), I=1,3)
-          READ(32,*) (TRJ(I), I=1,3)
-          READ(32,*) KMAX
-          DO K=1,KMAX
-            READ(32,*) (CAX(K,I), I=1,3)
-          ENDDO
-        ENDIF
-      CLOSE(UNIT=32)
+          IF(LINE(14:14).EQ.'L') THEN
+            LS=.TRUE.
+10          CONTINUE
+            READ(32,FMT='(A80)') LINE
+            IF(LINE(1:14).NE.'LINE SCAN DATA') GO TO 10
+            READ(32,*) (U0(I), I=1,3) 
+            READ(32,*) (R0(I), I=1,3)
+            READ(32,*) (POL_AXIS(I), I=1,3)
+            READ(32,*) POL
+            READ(32,*) (TRJ_AXIS(I), I=1,3)
+            READ(32,*) (TRJ(I), I=1,3)
+            READ(32,*) KMAX
+            DO K=1,KMAX
+              READ(32,*) (CAX(K,I), I=1,3)
+            ENDDO
+          ENDIF
+        CLOSE(UNIT=32)
+
+      endif
+
+      USE=.FALSE.
 
       IF(LS) THEN
         R0(1)=VNORM(V0)
