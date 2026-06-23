@@ -162,6 +162,7 @@ C Start with the bigmap, get its positional data
       CALL READ_MAP(LMRKFILE,mapSize,QSZ,S0,V,UX,UY,UZ,HT,AL)
 
       write (*,*) "Max pixels:  ", (QSZ*2+1)**2
+
       CALL get_heights(mapSize,qsz,ux,uy,uz,v,s0, zuse,zht,zal) 
       DO I=-QSZ,QSZ
       DO J=-QSZ,QSZ
@@ -181,6 +182,7 @@ C       Set best resolution value to high value to avoid
         bestRes (i,J) = 9999
       ENDDO
       ENDDO
+
       call hgt2slp(mapSize,qsz,HUSE,HT, tuse,tmpl)
       DO J=-QSZ,QSZ
       DO I=-QSZ,QSZ
@@ -238,7 +240,6 @@ C 1st Loop to get image size
         endif
       close (120)
       
-      write (*,*) "Max pix/line: ", maxPix, maxLine
       allocate (imageDN (1:maxPix,1:maxLine) )
 
 
@@ -331,7 +332,7 @@ C          Translates the image's DN values into the bigmap's DN matrix
           mappedCnt = 0
           DO J=-QSZ,QSZ
           DO I=-QSZ,QSZ
-          CALL V2IMGPL(mapVect(1,I,J),imageV,PICNM,NPX,NLN,
+          CALL xV2IMGPL(mapVect(1,I,J),imageV,PICNM,NPX,NLN,
      .                   MMFL,CTR,KMAT,D,
      .                   CX,CY,CZ, USE,IMGPL)
 C           Checks to ensure image did fall within the boundaries of the maplet
@@ -383,8 +384,8 @@ C           Testing to see if illuminated
             IF(VDOT(SZ,N(1,i,j)).GT.0) THEN
 
 C           Use V2IMGPL to see if the pixel is valid for the image
-              CALL V2IMGPL(mapVect(1,I,J),imageV,PICNM,NPX,NLN,MMFL,CTR,
-     .                     KMAT,D,CX,CY,CZ, USE,IMGPL)
+              CALL xV2IMGPL(mapVect(1,I,J),imageV,PICNM,NPX,NLN,MMFL,CTR
+     .                     , KMAT,D,CX,CY,CZ, USE,IMGPL)
 
 
 C             Check for image resolution
