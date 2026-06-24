@@ -151,7 +151,7 @@ C Allocate dynamic memory from static
 
 
 
-      version = 1.5
+      version = 1.51
 
 C Start with the bigmap, get its positional data
       write (*,*) "Version: ", version
