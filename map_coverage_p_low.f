@@ -1,4 +1,4 @@
-c     gfortran -O2  map_coverage_p_low.f /usr/local/lib/spicelib.a /usr/local/lib/COMMON.a -o ~/bin/map_coverage_p_low
+c     gfortran -O2 map_coverage_p_low.f /usr/local/lib/spicelib.a xCommon/*.f -o ~/bin/map_coverage_p_low
 c		17 June 2021 - Eric E. Palmer
 c     Adjusted to add 1 (vs 15) for each image detected
 C     Also includes outputting the best resolution per pixel
@@ -17,12 +17,17 @@ C     Version 1.3 - 24 Oct 2024
 C         Added code to omit DN values less than T1
 C     Version 1.4 - 20 May 2026
 C         Dynamic memory
+C     Version 1.5 - 26 May 2026
+C         Make the array processing handle large image files
+C     Version 1.51 - 24 Jun 2026
+C         Updated using code pulled from COMMON.a to make xCommon
+C         May need to compile twice. 
+
 
 
       IMPLICIT NONE
       
       INTEGER               imageSize
-      PARAMETER            (imageSize=1300)
       INTEGER               mapSize
       PARAMETER            (mapSize=2500)
       INTEGER               QSZ
@@ -53,7 +58,7 @@ C      DOUBLE PRECISION      N(3,-mapSize:mapSize,-mapSize:mapSize)
       DOUBLE PRECISION      RESLIM
       DOUBLE PRECISION      RES
       DOUBLE PRECISION      Z1, Z2, Z3, Z4, Z5, Z6, Z7
-      DOUBLE PRECISION      BRT1
+      DOUBLE PRECISION      xBrt
 
 
 
@@ -80,6 +85,7 @@ C      real*4                bestRes (-mapSize:mapSize, -mapSize:mapSize)
       INTEGER               SLEN
       INTEGER               LMCOUNT      
       INTEGER               T1, T2
+      INTEGER               maxPix, maxLine
 
       CHARACTER*1           ANS        
       CHARACTER*6           BIGMAP        
@@ -139,14 +145,13 @@ C Allocate dynamic memory from static
       allocate (ZUSE (-mapsize:mapsize,-mapsize:mapsize) )
       allocate (tuse (-mapsize:mapsize,-mapsize:mapsize) )
 
-      allocate (imageDN (-imageSize:imageSize,-imageSize:imageSize) )
       allocate (mapDN (-mapSize:mapSize,-mapSize:mapSize) )
       allocate (mapHeight (-mapSize:mapSize,-mapSize:mapSize) )
 
 
 
 
-      version = 1.4
+      version = 1.5
 
 C Start with the bigmap, get its positional data
       write (*,*) "Version: ", version
@@ -159,6 +164,7 @@ C Start with the bigmap, get its positional data
       CALL READ_MAP(LMRKFILE,mapSize,QSZ,S0,V,UX,UY,UZ,HT,AL)
 
       write (*,*) "Max pixels:  ", (QSZ*2+1)**2
+
       CALL get_heights(mapSize,qsz,ux,uy,uz,v,s0, zuse,zht,zal) 
       DO I=-QSZ,QSZ
       DO J=-QSZ,QSZ
@@ -178,6 +184,7 @@ C       Set best resolution value to high value to avoid
         bestRes (i,J) = 9999
       ENDDO
       ENDDO
+
       call hgt2slp(mapSize,qsz,HUSE,HT, tuse,tmpl)
       DO J=-QSZ,QSZ
       DO I=-QSZ,QSZ
@@ -209,7 +216,33 @@ C Get list of images to check -- coverage_p.in allows a subset (if you also say 
       open(unit=120, file=INFILE, status='old')
       open(unit=30, file='coverage_p.out', status='unknown')
 
-      write (*,*) "In file:  ", infile
+
+C 1st Loop to get image size
+      open(unit=120, file=INFILE, status='old')
+      maxPix = 0
+      maxLine = 0
+11    continue
+
+        read(120,fmt='(a13)') xname
+        if(xname(1:1).eq.'!') go to 11
+        if(xname(1:1).eq.'#') go to 11
+        if(xname(1:3).ne.'END') then
+          PICNM=XNAME(2:13)
+          I=SLEN(PICNM)
+          PICTFILE='./SUMFILES/'//PICNM(1:I)//'.SUM'
+          OPEN(UNIT=10,FILE=PICTFILE,STATUS='OLD')
+            READ(10,*)
+            READ(10,*)
+            READ(10,*)  NPX, NLN, T1, T2
+            if (NPX .GT. maxPix) maxPix = NPX
+            if (NLN .GT. maxLine) maxLine = NLN
+          CLOSE(UNIT=10)
+        
+        go to 11
+        endif
+      close (120)
+      
+      allocate (imageDN (1:maxPix,1:maxLine) )
 
 
 C Loop through all SUMFILES to get geometry
@@ -221,6 +254,11 @@ C Loop through all SUMFILES to get geometry
      .  "Ex_T1/T2"
         WRITE(30,FMT='(1A,A12,2A10,4A10)')  "#", "PICNM","Angle","Res?",
      .     "# LMK", "Min Thres", "Max Thres", "Pixel", "Used"
+
+
+
+C 2nd loop for each image
+      open(unit=120, file=INFILE, status='old')
 10      continue
 
         read(120,fmt='(a13)') xname
@@ -281,19 +319,30 @@ C         Load the image's DN value into the image's DN array
           Z0(1)=NINT(CTR(1))
           Z0(2)=NINT(CTR(2))
 
-          CALL PICINPT(PICNM,Z0,KK,imageDN,imageSize)
+          imageSize = maxLine
+          CALL xPicInpt (PICNM,imageDN, maxPix, maxLine)
+          DO I=0,NLN
+          DO J=0,NPX
+c      write(*,'(I6)', advance='no') imageDN (I,J)
+          ENDDO
+c      write (*,*)
+          ENDDO
+
 C -----------------------
 C          Translates the image's DN values into the bigmap's DN matrix
 
           mappedCnt = 0
           DO J=-QSZ,QSZ
           DO I=-QSZ,QSZ
-           CALL V2IMGPL(mapVect(1,I,J),imageV,PICNM,NPX,NLN,
+          CALL xV2IMGPL(mapVect(1,I,J),imageV,PICNM,NPX,NLN,
      .                   MMFL,CTR,KMAT,D,
      .                   CX,CY,CZ, USE,IMGPL)
 C           Checks to ensure image did fall within the boundaries of the maplet
             IF(USE) THEN
-              Z1 = BRT1(IMGPL, Z0, KK, imageDN, imageSize)
+              Z1 = xBrt(IMGPL, NPX, NLN, imageDN, maxPix, maxLine)
+c         if (Z1 .NE. 0) then
+c#         write (*,*) Z1, mapDN (I,J), mappedCnt
+c         endif
               IF(Z1.NE.0) mapDN(I,J) = Z1
               mappedCnt = mappedCnt + 1
             ENDIF
@@ -337,8 +386,8 @@ C           Testing to see if illuminated
             IF(VDOT(SZ,N(1,i,j)).GT.0) THEN
 
 C           Use V2IMGPL to see if the pixel is valid for the image
-              CALL V2IMGPL(mapVect(1,I,J),imageV,PICNM,NPX,NLN,MMFL,CTR,
-     .                     KMAT,D,CX,CY,CZ, USE,IMGPL)
+              CALL xV2IMGPL(mapVect(1,I,J),imageV,PICNM,NPX,NLN,MMFL,CTR
+     .                     , KMAT,D,CX,CY,CZ, USE,IMGPL)
 
 
 C             Check for image resolution
@@ -362,6 +411,7 @@ C 	              Res is the current pixel resolution.  Save it if it's better
                  if (RES .LT. bestRes(i,j) ) then
                     bestRes(i,j) = RES
                     usedK=usedK+1
+C        write (*,*) "usedK", usedK
                  endif
 
               ENDIF
