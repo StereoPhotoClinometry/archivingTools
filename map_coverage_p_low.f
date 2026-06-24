@@ -1,4 +1,4 @@
-c     gfortran -O2  map_coverage_p_low.f /usr/local/lib/spicelib.a /usr/local/lib/COMMON.a -o ~/bin/map_coverage_p_low
+c     gfortran -O2 map_coverage_p_low.f /usr/local/lib/spicelib.a xCommon/*.f -o ~/bin/map_coverage_p_low
 c		17 June 2021 - Eric E. Palmer
 c     Adjusted to add 1 (vs 15) for each image detected
 C     Also includes outputting the best resolution per pixel
@@ -19,7 +19,9 @@ C     Version 1.4 - 20 May 2026
 C         Dynamic memory
 C     Version 1.5 - 26 May 2026
 C         Make the array processing handle large image files
-
+C     Version 1.6 - 24 Jun 2026
+C         Updated using code pulled from COMMON.a to make xCommon
+C         May need to compile twice. 
 
 
 
